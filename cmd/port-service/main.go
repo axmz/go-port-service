@@ -7,13 +7,23 @@ import (
 
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/gracefulshutdown"
+	db "github.com/axmz/go-port-service/internal/inmem"
+	repository "github.com/axmz/go-port-service/internal/repository/port"
+	"github.com/axmz/go-port-service/internal/services/port"
 	hh "github.com/axmz/go-port-service/internal/transport/http"
 )
 
 func run() error {
 	cfg := config.LoadConfig()
 
-	h := hh.NewHttpServer(nil)
+	d := db.NewInMemoryDB()
+
+	r := repository.NewPortRepository(d)
+
+	s := port.NewPortService(r)
+
+	h := hh.NewHttpServer(s)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.HomePage)
 	mux.HandleFunc("/metrics", h.Metrics)
