@@ -1,11 +1,12 @@
 package port
 
 import (
+	"github.com/axmz/go-port-service/internal/domain/port"
 	"github.com/axmz/go-port-service/internal/transport/http"
 )
 
 type PortRepo interface {
-	GetPort(id string) (http.Port, error)
+	GetPort(id string) (http.PortResponse, error)
 	GetPortsCount() int
 	UploadPorts()
 }
@@ -20,8 +21,8 @@ func NewPortService(r PortRepo) *PortService {
 	}
 }
 
-func (p *PortService) GetPort(id string) (http.Port, error) {
-	return http.Port{}, nil
+func (p *PortService) GetPort(id string) (port.Port, error) {
+	return port.Port{}, nil
 }
 
 func (p *PortService) GetPortsCount() int {

@@ -17,11 +17,11 @@ func NewPortRepository(db InMem) *PortRepository {
 	}
 }
 
-func (r PortRepository) GetPort(id string) (http.Port, error) {
+func (r PortRepository) GetPort(id string) (http.PortResponse, error) {
 	if _, exists := r.db.Get(id); exists {
-		return http.Port{}, nil
+		return http.PortResponse{}, nil
 	}
-	return http.Port{}, nil
+	return http.PortResponse{}, nil
 }
 
 func (r PortRepository) GetPortsCount() int {

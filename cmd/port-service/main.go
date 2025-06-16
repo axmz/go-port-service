@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/gracefulshutdown"
+	"github.com/axmz/go-port-service/internal/router"
+
 	db "github.com/axmz/go-port-service/internal/inmem"
 	repository "github.com/axmz/go-port-service/internal/repository/port"
-	"github.com/axmz/go-port-service/internal/services/port"
-	hh "github.com/axmz/go-port-service/internal/transport/http"
+	services "github.com/axmz/go-port-service/internal/services/port"
+	transport "github.com/axmz/go-port-service/internal/transport/http"
 )
 
 func run() error {
@@ -20,23 +21,18 @@ func run() error {
 
 	r := repository.NewPortRepository(d)
 
-	s := port.NewPortService(r)
+	s := services.NewPortService(r)
 
-	h := hh.NewHttpServer(s)
+	h := transport.NewHttpServer(s)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.HomePage)
-	mux.HandleFunc("/metrics", h.Metrics)
-	mux.HandleFunc("/port", h.GetPort)
-	mux.HandleFunc("/count", h.GetPortsCount)
-	mux.HandleFunc("POST /ports", h.UploadPorts)
+	mux := router.Router(h)
 
 	srv := &http.Server{
-		Addr:         cfg.Port,
 		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  120 * time.Second,
+		Addr:         cfg.Port,
+		IdleTimeout:  cfg.IdleTimeout,
+		ReadTimeout:  cfg.ReadTimeout,
+		WriteTimeout: cfg.WriteTimeout,
 	}
 
 	shutdown := gracefulshutdown.Start(srv)
