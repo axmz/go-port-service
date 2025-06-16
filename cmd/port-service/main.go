@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/transport/http"
@@ -25,18 +23,10 @@ func run() error {
 
 	srv := http.StartServer(cfg, s)
 
-	wait := graceful.Shutdown(
-		2*time.Second,
-		map[string]func(ctx context.Context) error{
-			"database": func(ctx context.Context) error {
-				return d.Shutdown()
-			},
-			"http-server": func(ctx context.Context) error {
-				return srv.Shutdown(ctx)
-			},
-		})
-
-	<-wait
+	<-graceful.Shutdown(cfg.GracefulTimeout, map[string]graceful.Operation{
+		"database":    d.Shutdown,
+		"http-server": srv.Shutdown,
+	})
 
 	log.Println("Application stopped")
 

@@ -1,7 +1,7 @@
 package inmem
 
 import (
-	"fmt"
+	"context"
 	"sync"
 )
 
@@ -32,7 +32,11 @@ func (db *InMemoryDB) Put(key, value string) {
 	db.data[key] = value
 }
 
-func (db *InMemoryDB) Shutdown() error {
-	fmt.Println("DB Shutdown")
-	return nil
+func (db *InMemoryDB) Shutdown(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		return nil
+	}
 }

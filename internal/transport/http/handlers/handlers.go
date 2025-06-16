@@ -45,7 +45,7 @@ func (h *Handlers) HomePage(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintln(w, "Hello, world!")
+	http.ServeFile(w, r, "./static/index.html")
 }
 
 func (h *Handlers) toPortResponse(p *port.Port) PortResponse {

@@ -8,24 +8,26 @@ import (
 )
 
 type Config struct {
-	Port         string
-	Env          string
-	DBURL        string
-	LogLevel     string
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	IdleTimeout  time.Duration
+	Port            string
+	Env             string
+	DBURL           string
+	LogLevel        string
+	ReadTimeout     time.Duration
+	WriteTimeout    time.Duration
+	IdleTimeout     time.Duration
+	GracefulTimeout time.Duration
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		Port:         getEnv("PORT", ":8080"),
-		Env:          getEnv("APP_ENV", "development"),
-		DBURL:        getEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
-		LogLevel:     getEnv("LOG_LEVEL", "info"),
-		ReadTimeout:  getEnvAsDuration("READ_TIMEOUT", 5*time.Second),
-		WriteTimeout: getEnvAsDuration("WRITE_TIMEOUT", 10*time.Second),
-		IdleTimeout:  getEnvAsDuration("IDLE_TIMEOUT", 120*time.Second),
+		Port:            getEnv("PORT", ":8080"),
+		Env:             getEnv("APP_ENV", "development"),
+		DBURL:           getEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
+		LogLevel:        getEnv("LOG_LEVEL", "info"),
+		ReadTimeout:     getEnvAsDuration("READ_TIMEOUT", 5*time.Second),
+		WriteTimeout:    getEnvAsDuration("WRITE_TIMEOUT", 10*time.Second),
+		IdleTimeout:     getEnvAsDuration("IDLE_TIMEOUT", 120*time.Second),
+		GracefulTimeout: getEnvAsDuration("GRACEFUL_TIMEOUT", 2*time.Second),
 	}
 }
 

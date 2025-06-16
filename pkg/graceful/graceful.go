@@ -10,7 +10,9 @@ import (
 	"time"
 )
 
-func Shutdown(timeout time.Duration, ops map[string]func(ctx context.Context) error) <-chan struct{} {
+type Operation = func(ctx context.Context) error
+
+func Shutdown(timeout time.Duration, ops map[string]Operation) <-chan struct{} {
 	wait := make(chan struct{})
 	go func() {
 		s := make(chan os.Signal, 1)
