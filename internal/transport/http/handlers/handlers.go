@@ -1,4 +1,4 @@
-package http
+package handlers
 
 import (
 	"errors"
@@ -25,22 +25,22 @@ type PortResponse struct {
 }
 
 type PortService interface {
-	GetPort(id string) (port.Port, error)
+	GetPort(id string) (*port.Port, error)
 	GetPortsCount() int
-	UploadPorts()
+	UploadPorts() error
 }
 
-type HttpServer struct {
+type Handlers struct {
 	service PortService
 }
 
-func NewHttpServer(s PortService) *HttpServer {
-	return &HttpServer{
+func NewHttpHandlers(s PortService) *Handlers {
+	return &Handlers{
 		service: s,
 	}
 }
 
-func (h *HttpServer) HomePage(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) HomePage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -48,7 +48,7 @@ func (h *HttpServer) HomePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, world!")
 }
 
-func (h *HttpServer) toPortResponse(p port.Port) PortResponse {
+func (h *Handlers) toPortResponse(p *port.Port) PortResponse {
 	r := PortResponse{
 		ID:          p.ID(),
 		Name:        p.Name(),
@@ -65,7 +65,7 @@ func (h *HttpServer) toPortResponse(p port.Port) PortResponse {
 	return r
 }
 
-func (h *HttpServer) GetPort(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetPort(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
 		response.MissingID(w)
@@ -84,14 +84,14 @@ func (h *HttpServer) GetPort(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *HttpServer) GetPortsCount(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetPortsCount(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "GetPortsCount")
 }
 
-func (h *HttpServer) UploadPorts(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "UploadPorts")
 }
 
-func (h *HttpServer) Metrics(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Metrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, metrics!")
 }
