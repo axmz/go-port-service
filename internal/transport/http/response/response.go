@@ -8,7 +8,6 @@ import (
 
 // TODO: implement as per RFC 7807
 
-// Json writes a Json response with custom status code.
 func Json(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)

@@ -15,7 +15,7 @@ func Router(h *handlers.Handlers) http.Handler {
 	mux.HandleFunc("/metrics", h.Metrics)
 	mux.HandleFunc("/port", h.GetPort)
 	mux.HandleFunc("/count", h.GetPortsCount)
-	// TODO: add get ports
+	mux.HandleFunc("GET /ports", h.GetPortsCount)
 	mux.HandleFunc("POST /ports", h.UploadPorts)
 	return middleware.LoggingMiddleware(mux)
 }

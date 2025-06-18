@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
+// domain errors
 var (
 	ErrNotFound   = errors.New("port not found")
 	ErrValidation = errors.New("validation error")
 	ErrRequired   = fmt.Errorf("%w: value cannot be empty", ErrValidation)
-	//...
 )
 
 type Port struct {
@@ -24,24 +24,6 @@ type Port struct {
 	province    string
 	timezone    string
 	unlocs      []string
-}
-
-func validate(id, name, city, country string) error {
-	// TODO: add validation library?
-	fields := map[string]string{
-		"port id":      id,
-		"port name":    name,
-		"port city":    city,
-		"port country": country,
-	}
-
-	for field, value := range fields {
-		if value == "" {
-			return fmt.Errorf("%w: %s", ErrRequired, field)
-		}
-	}
-
-	return nil
 }
 
 func NewPort(
@@ -77,7 +59,6 @@ func NewPort(
 	}, nil
 }
 
-// ID returns id
 func (p *Port) ID() string {
 	return p.id
 }
@@ -86,7 +67,6 @@ func (p *Port) Name() string {
 	return p.name
 }
 
-// SetName sets the port name.
 func (p *Port) SetName(name string) error {
 	if name == "" {
 		return fmt.Errorf("%w: port name is required", ErrRequired)
