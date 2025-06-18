@@ -75,6 +75,6 @@ func (r PortRepository) GetPortsCount() int {
 	return 5
 }
 
-func (r PortRepository) UploadPorts() error {
+func (r PortRepository) UploadPort(p *port.Port) error {
 	return nil
 }

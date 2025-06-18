@@ -7,7 +7,7 @@ import (
 type PortRepo interface {
 	GetPort(id string) (*port.Port, error)
 	GetPortsCount() int
-	UploadPorts() error
+	UploadPort(*port.Port) error
 }
 
 type PortService struct {
@@ -28,6 +28,6 @@ func (p *PortService) GetPortsCount() int {
 	return p.repo.GetPortsCount()
 }
 
-func (p *PortService) UploadPorts() error {
-	return p.repo.UploadPorts()
+func (p *PortService) UploadPort(port *port.Port) error {
+	return p.repo.UploadPort(port)
 }

@@ -10,14 +10,12 @@ type InMemoryDB struct {
 	mu   sync.RWMutex
 }
 
-// NewInMemoryDB initializes the DB.
 func NewInMemoryDB() *InMemoryDB {
 	return &InMemoryDB{
 		data: make(map[string]any),
 	}
 }
 
-// Get returns the value for a key, or false if not found.
 func (db *InMemoryDB) Get(key string) (any, bool) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
@@ -25,7 +23,6 @@ func (db *InMemoryDB) Get(key string) (any, bool) {
 	return val, ok
 }
 
-// Put sets the value for a key.
 func (db *InMemoryDB) Put(key, value string) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
