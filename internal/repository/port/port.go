@@ -6,7 +6,9 @@ import (
 
 type InMem interface {
 	Get(key string) (any, bool)
+	GetAll() []string
 	Put(key string, value any)
+	Delete(key string) (any, bool)
 	Len() int
 }
 
@@ -20,7 +22,7 @@ func NewPortRepository(db InMem) *PortRepository {
 	}
 }
 
-func (r PortRepository) GetPort(id string) (*port.Port, error) {
+func (r PortRepository) GetPortById(id string) (*port.Port, error) {
 	portDb, exists := r.db.Get(id)
 	if !exists {
 		return nil, port.ErrNotFound
@@ -34,6 +36,10 @@ func (r PortRepository) GetPort(id string) (*port.Port, error) {
 	return p, nil
 }
 
+func (r PortRepository) GetAllPorts() ([]string, error) {
+	return r.db.GetAll(), nil
+}
+
 func (r PortRepository) GetPortsCount() int {
 	return r.db.Len()
 }
@@ -45,4 +51,18 @@ func (r PortRepository) UploadPort(p *port.Port) error {
 	}
 	r.db.Put(portRepo.ID, portRepo)
 	return nil
+}
+
+func (r PortRepository) DeletePortById(id string) (*port.Port, error) {
+	portDb, exists := r.db.Delete(id)
+	if !exists {
+		return nil, port.ErrNotFound
+	}
+
+	p, err := fromRepositoryToDomain(portDb.(*Port))
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
 }

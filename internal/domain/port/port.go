@@ -3,9 +3,9 @@ package port
 import (
 	"errors"
 	"fmt"
+	"slices"
 )
 
-// domain errors
 var (
 	ErrNotFound   = errors.New("port not found")
 	ErrValidation = errors.New("validation error")
@@ -109,4 +109,20 @@ func (p *Port) Timezone() string {
 
 func (p *Port) Unlocs() []string {
 	return p.unlocs
+}
+
+func (p *Port) Copy() (*Port, error) {
+	return NewPort(
+		p.ID(),
+		p.Name(),
+		p.Code(),
+		p.City(),
+		p.Country(),
+		slices.Clone(p.Alias()),
+		slices.Clone(p.Regions()),
+		slices.Clone(p.Coordinates()),
+		p.Province(),
+		p.Timezone(),
+		slices.Clone(p.Unlocs()),
+	)
 }

@@ -5,9 +5,11 @@ import (
 )
 
 type PortRepo interface {
-	GetPort(id string) (*port.Port, error)
+	GetPortById(id string) (*port.Port, error)
+	GetAllPorts() ([]string, error)
 	GetPortsCount() int
 	UploadPort(*port.Port) error
+	DeletePortById(id string) (*port.Port, error)
 }
 
 type PortService struct {
@@ -21,7 +23,11 @@ func NewPortService(r PortRepo) *PortService {
 }
 
 func (p *PortService) GetPort(id string) (*port.Port, error) {
-	return p.repo.GetPort(id)
+	return p.repo.GetPortById(id)
+}
+
+func (p *PortService) GetAllPorts() ([]string, error) {
+	return p.repo.GetAllPorts()
 }
 
 func (p *PortService) GetPortsCount() int {
@@ -30,4 +36,8 @@ func (p *PortService) GetPortsCount() int {
 
 func (p *PortService) UploadPort(port *port.Port) error {
 	return p.repo.UploadPort(port)
+}
+
+func (p *PortService) DeletePortById(id string) (*port.Port, error) {
+	return p.repo.DeletePortById(id)
 }

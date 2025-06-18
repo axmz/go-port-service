@@ -10,12 +10,19 @@ import (
 func Router(h *handlers.Handlers) http.Handler {
 	fs := http.FileServer(http.Dir("../../static"))
 	mux := http.NewServeMux()
+
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	mux.HandleFunc("/", h.HomePage)
 	mux.HandleFunc("/metrics", h.Metrics)
-	mux.HandleFunc("/port", h.GetPort)
-	mux.HandleFunc("/count", h.GetPortsCount)
-	mux.HandleFunc("GET /ports", h.GetPortsCount)
-	mux.HandleFunc("POST /ports", h.UploadPorts)
+
+	// TODO: give same name in postman
+	mux.HandleFunc("POST /api/ports", h.UploadPorts)
+	mux.HandleFunc("GET /api/ports", h.GetAllPorts)
+	mux.HandleFunc("GET /api/ports/{id}", h.GetPortById)
+	mux.HandleFunc("GET /api/ports/count", h.GetPortsCount)
+	mux.HandleFunc("PUT /api/ports/{id}", h.UpdatePort)
+	mux.HandleFunc("DELETE /api/ports/{id}", h.DeletePortById)
+
 	return middleware.LoggingMiddleware(mux)
 }

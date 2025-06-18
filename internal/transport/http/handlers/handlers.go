@@ -15,6 +15,8 @@ import (
 
 type PortService interface {
 	GetPort(id string) (*port.Port, error)
+	DeletePortById(id string) (*port.Port, error)
+	GetAllPorts() ([]string, error)
 	GetPortsCount() int
 	UploadPort(*port.Port) error
 }
@@ -37,8 +39,18 @@ func (h *Handlers) HomePage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./static/index.html")
 }
 
-func (h *Handlers) GetPort(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+func (h *Handlers) GetAllPorts(w http.ResponseWriter, r *http.Request) {
+	data, err := h.service.GetAllPorts()
+	if err != nil {
+		response.InternalServerError(w, err)
+		return
+	}
+	response.Ok(w, data)
+}
+
+func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
 	if id == "" {
 		response.BadRequest(w, "missing id")
 		return
@@ -123,14 +135,65 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 			countPorts++
 			if portDomain, err := toDomain(&p); err != nil {
 				response.Err(w, http.StatusBadRequest, err.Error())
-			} else {
-				h.service.UploadPort(portDomain)
+			} else if err := h.service.UploadPort(portDomain); err != nil {
+				response.BadRequest(w, err.Error())
+				return
 			}
 		case <-doneCh:
 			log.Println("data processed successfully")
 			response.Ok(w, countPorts)
 			return
 		}
+	}
+}
+
+func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	if id == "" {
+		response.BadRequest(w, "missing id")
+		return
+	}
+
+	// TODO: extract this block?
+	if p, err := h.service.GetPort(id); err != nil {
+		if errors.Is(err, port.ErrNotFound) {
+			response.NotFound(w)
+		} else {
+			response.InternalServerError(w, err)
+		}
+		return
+	} else {
+		copy, _ := p.Copy()
+		// TODO: impl granular update or complete replace
+		copy.SetName("TEST")
+		if err := h.service.UploadPort(copy); err != nil {
+			response.BadRequest(w, err.Error())
+			return
+		} else {
+			response.Ok(w, h.toPortResponse(copy))
+		}
+	}
+}
+
+func (h *Handlers) DeletePortById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	if id == "" {
+		response.BadRequest(w, "missing id")
+		return
+	}
+
+	// TODO: reuse block?
+	if p, err := h.service.DeletePortById(id); err != nil {
+		if errors.Is(err, port.ErrNotFound) {
+			response.NotFound(w)
+		} else {
+			response.InternalServerError(w, err)
+		}
+		return
+	} else {
+		response.Ok(w, h.toPortResponse(p))
 	}
 }
 
