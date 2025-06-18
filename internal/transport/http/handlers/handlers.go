@@ -72,7 +72,7 @@ func (h *Handlers) toPortResponse(p *port.Port) PortResponse {
 func (h *Handlers) GetPort(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		response.MissingID(w)
+		response.BadRequest(w, "missing id")
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *Handlers) GetPort(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		response.JSONOK(w, h.toPortResponse(p))
+		response.Ok(w, h.toPortResponse(p))
 	}
 }
 
@@ -167,17 +167,17 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 			return
 		case err := <-errCh:
 			log.Println(err)
-			response.JSONError(w, http.StatusBadRequest, err.Error())
+			response.Err(w, http.StatusBadRequest, err.Error())
 			return
 		case p := <-portCh:
 			countPorts++
 			if portDomain, err := toDomain(&p); err != nil {
-				response.JSONError(w, http.StatusBadRequest, err.Error())
+				response.Err(w, http.StatusBadRequest, err.Error())
 				h.service.UploadPort(portDomain)
 			} // ?
 		case <-doneCh:
 			log.Println("data processed successfully")
-			response.JSONOK(w, countPorts)
+			response.Ok(w, countPorts)
 			return
 		}
 	}
