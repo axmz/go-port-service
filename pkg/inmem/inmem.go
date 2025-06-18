@@ -23,10 +23,14 @@ func (db *InMemoryDB) Get(key string) (any, bool) {
 	return val, ok
 }
 
-func (db *InMemoryDB) Put(key, value string) {
+func (db *InMemoryDB) Put(key string, value any) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	db.data[key] = value
+}
+
+func (db *InMemoryDB) Len() int {
+	return len(db.data)
 }
 
 func (db *InMemoryDB) Shutdown(ctx context.Context) error {

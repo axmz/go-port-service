@@ -26,7 +26,8 @@ type Port struct {
 
 type InMem interface {
 	Get(key string) (any, bool)
-	Put(key, value string)
+	Put(key string, value any)
+	Len() int
 }
 
 type PortRepository struct {
@@ -72,9 +73,30 @@ func (r PortRepository) GetPort(id string) (*port.Port, error) {
 }
 
 func (r PortRepository) GetPortsCount() int {
-	return 5
+	return r.db.Len()
+}
+
+func toRepository(p *port.Port) (*Port, error) {
+	return &Port{
+		ID:          p.ID(),
+		Name:        p.Name(),
+		Code:        p.Code(),
+		City:        p.City(),
+		Country:     p.Country(),
+		Alias:       append([]string(nil), p.Alias()...),
+		Regions:     append([]string(nil), p.Regions()...),
+		Coordinates: append([]float64(nil), p.Coordinates()...),
+		Province:    p.Province(),
+		Timezone:    p.Timezone(),
+		Unlocs:      append([]string(nil), p.Unlocs()...),
+	}, nil
 }
 
 func (r PortRepository) UploadPort(p *port.Port) error {
+	portRepo, err := toRepository(p)
+	if err != nil {
+		return err
+	}
+	r.db.Put(portRepo.ID, portRepo)
 	return nil
 }

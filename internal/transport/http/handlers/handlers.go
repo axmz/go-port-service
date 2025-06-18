@@ -89,7 +89,8 @@ func (h *Handlers) GetPort(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetPortsCount(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "GetPortsCount")
+	c := h.service.GetPortsCount()
+	response.Ok(w, c)
 }
 
 func readBody(r *http.Request, portCh chan PortRequest, errCh chan error, doneCh chan struct{}) {
@@ -173,8 +174,9 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 			countPorts++
 			if portDomain, err := toDomain(&p); err != nil {
 				response.Err(w, http.StatusBadRequest, err.Error())
+			} else {
 				h.service.UploadPort(portDomain)
-			} // ?
+			}
 		case <-doneCh:
 			log.Println("data processed successfully")
 			response.Ok(w, countPorts)
