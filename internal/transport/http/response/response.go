@@ -2,7 +2,8 @@ package response
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
+	"log/slog"
 	"net/http"
 )
 
@@ -12,7 +13,7 @@ func JSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("error encoding JSON: %v", err)
+		slog.Info(fmt.Sprintf("error encoding JSON: %v", err))
 	}
 }
 
@@ -28,12 +29,12 @@ func Err(w http.ResponseWriter, status int, msg string) {
 }
 
 func InternalServerError(w http.ResponseWriter, err error) {
-	log.Printf("Internal server error: %v", err)
+	slog.Info(fmt.Sprintf("Internal server error: %v", err))
 	Err(w, http.StatusInternalServerError, "internal server error")
 }
 
 func BadRequest(w http.ResponseWriter, msg string) {
-	log.Printf("Bad Request: %v", msg)
+	slog.Info(fmt.Sprintf("Bad Request: %v", msg))
 	Err(w, http.StatusBadRequest, msg)
 }
 

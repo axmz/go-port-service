@@ -22,9 +22,9 @@ type HTTPServer struct {
 	IdleTimeout  time.Duration
 }
 
-func LoadConfig() *Config {
+func MustLoad() *Config {
 	return &Config{
-		Env:             getEnv("APP_ENV", "development"),
+		Env:             getEnv("APP_ENV", "local"),
 		DBURL:           getEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
 		LogLevel:        getEnv("LOG_LEVEL", "info"),
 		GracefulTimeout: getEnvAsDuration("GRACEFUL_TIMEOUT", 2*time.Second),
@@ -49,7 +49,7 @@ func getEnvAsDuration(key string, defaultVal time.Duration) time.Duration {
 		if valInt, err := strconv.Atoi(valStr); err == nil {
 			return time.Duration(valInt) * time.Second
 		} else {
-			log.Printf("Invalid duration for %s: %v. Using default: %v", key, err, defaultVal)
+			log.Fatalf("Invalid duration for %s: %v. Using default: %v", key, err, defaultVal)
 		}
 	}
 	return defaultVal

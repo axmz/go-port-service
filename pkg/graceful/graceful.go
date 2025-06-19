@@ -2,7 +2,8 @@ package graceful
 
 import (
 	"context"
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
@@ -19,7 +20,7 @@ func Shutdown(timeout time.Duration, ops map[string]Operation) <-chan struct{} {
 		signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 		<-s
 
-		log.Println("shutting down")
+		slog.Info("shutting down")
 
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -31,13 +32,13 @@ func Shutdown(timeout time.Duration, ops map[string]Operation) <-chan struct{} {
 			go func() {
 				defer wg.Done()
 
-				log.Printf("cleaning up: %s", key)
+				slog.Info(fmt.Sprintf("cleaning up: %s", key))
 				if err := op(ctx); err != nil {
-					log.Printf("%s: clean up failed: %s", key, err.Error())
+					slog.Info(fmt.Sprintf("%s: clean up failed: %s", key, err.Error()))
 					return
 				}
 
-				log.Printf("%s was shutdown gracefully", key)
+				slog.Info(fmt.Sprintf("%s was shutdown gracefully", key))
 			}()
 		}
 

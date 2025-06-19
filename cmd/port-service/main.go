@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"log/slog"
 
 	"github.com/axmz/go-port-service/internal/config"
+	"github.com/axmz/go-port-service/internal/logger"
 	"github.com/axmz/go-port-service/internal/transport/http"
 	"github.com/axmz/go-port-service/pkg/graceful"
 	"github.com/axmz/go-port-service/pkg/inmem"
@@ -13,7 +15,11 @@ import (
 )
 
 func run() error {
-	cfg := config.LoadConfig()
+	cfg := config.MustLoad()
+
+	logger.Setup(cfg.Env)
+
+	slog.Info("Application starting", slog.String("env", cfg.Env))
 
 	d := inmem.NewInMemoryDB[*repo.Port]()
 
@@ -28,7 +34,7 @@ func run() error {
 		"http-server": srv.Shutdown,
 	})
 
-	log.Println("Application stopped")
+	slog.Info("Application stopped")
 
 	return nil
 }

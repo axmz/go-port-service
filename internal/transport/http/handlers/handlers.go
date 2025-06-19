@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/axmz/go-port-service/internal/domain/port"
@@ -129,10 +129,10 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-r.Context().Done():
-			log.Println("request cancelled")
+			slog.Info("request cancelled")
 			return
 		case err := <-errCh:
-			log.Println(err)
+			slog.Info(err.Error())
 			response.Err(w, http.StatusBadRequest, err.Error())
 			return
 		case p := <-portCh:
@@ -144,7 +144,7 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case <-doneCh:
-			log.Println("data processed successfully")
+			slog.Info("data processed successfully")
 			response.OK(w, countPorts)
 			return
 		}

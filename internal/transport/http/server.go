@@ -1,7 +1,9 @@
 package http
 
 import (
+	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -40,7 +42,7 @@ func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
 	}
 
 	go func() {
-		log.Printf("Starting server on %s\n", cfg.HTTPServer.Port)
+		slog.Info(fmt.Sprintf("Starting server on %s", cfg.HTTPServer.Port))
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("HTTP server ListenAndServe: %v", err)
 		}
