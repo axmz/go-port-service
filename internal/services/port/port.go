@@ -16,7 +16,7 @@ type PortService struct {
 	repo PortRepo
 }
 
-func NewPortService(r PortRepo) *PortService {
+func New(r PortRepo) *PortService {
 	return &PortService{
 		repo: r,
 	}

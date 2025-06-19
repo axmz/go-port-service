@@ -6,12 +6,12 @@ import (
 
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/logger"
-	"github.com/axmz/go-port-service/internal/transport/http"
 	"github.com/axmz/go-port-service/pkg/graceful"
 	"github.com/axmz/go-port-service/pkg/inmem"
 
-	repo "github.com/axmz/go-port-service/internal/repository/port"
-	serv "github.com/axmz/go-port-service/internal/services/port"
+	repository "github.com/axmz/go-port-service/internal/repository/port"
+	services "github.com/axmz/go-port-service/internal/services/port"
+	httpServer "github.com/axmz/go-port-service/internal/transport/http"
 )
 
 func run() error {
@@ -21,13 +21,13 @@ func run() error {
 
 	slog.Info("Application starting", slog.String("env", cfg.Env))
 
-	d := inmem.NewInMemoryDB[*repo.Port]()
+	d := inmem.New[*repository.Port]()
 
-	r := repo.NewPortRepository(d)
+	r := repository.New(d)
 
-	s := serv.NewPortService(r)
+	s := services.New(r)
 
-	srv := http.StartServer(cfg, s)
+	srv := httpServer.Start(cfg, s)
 
 	<-graceful.Shutdown(cfg.GracefulTimeout, map[string]graceful.Operation{
 		"database":    d.Shutdown,

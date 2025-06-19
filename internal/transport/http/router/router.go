@@ -28,5 +28,5 @@ func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
 	mux.HandleFunc("PUT /api/ports/{id}", h.UpdatePort)
 	mux.HandleFunc("DELETE /api/ports/{id}", h.DeletePortByID)
 
-	return middleware.LoggingMiddleware(mux)
+	return middleware.Logger(mux)
 }

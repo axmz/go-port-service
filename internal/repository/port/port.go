@@ -16,7 +16,7 @@ type PortRepository struct {
 	db InMem[*Port]
 }
 
-func NewPortRepository(db InMem[*Port]) *PortRepository {
+func New(db InMem[*Port]) *PortRepository {
 	return &PortRepository{
 		db: db,
 	}

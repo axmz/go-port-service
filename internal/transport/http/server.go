@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
+func Start(cfg *config.Config, s *port.PortService) *http.Server {
 	h := handlers.NewHTTPHandlers(s)
 
 	gqlsrv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{

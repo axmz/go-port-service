@@ -10,7 +10,7 @@ type InMemoryDB[T any] struct {
 	mu   sync.RWMutex
 }
 
-func NewInMemoryDB[T any]() *InMemoryDB[T] {
+func New[T any]() *InMemoryDB[T] {
 	return &InMemoryDB[T]{
 		data: make(map[string]T),
 	}
