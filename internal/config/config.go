@@ -12,10 +12,10 @@ type Config struct {
 	DBURL           string
 	LogLevel        string
 	GracefulTimeout time.Duration
-	HttpServer      HttpServer
+	HTTPServer      HTTPServer
 }
 
-type HttpServer struct {
+type HTTPServer struct {
 	Port         string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
@@ -28,7 +28,7 @@ func LoadConfig() *Config {
 		DBURL:           getEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
 		LogLevel:        getEnv("LOG_LEVEL", "info"),
 		GracefulTimeout: getEnvAsDuration("GRACEFUL_TIMEOUT", 2*time.Second),
-		HttpServer: HttpServer{
+		HTTPServer: HTTPServer{
 			Port:         getEnv("PORT", ":8080"),
 			ReadTimeout:  getEnvAsDuration("READ_TIMEOUT", 5*time.Second),
 			WriteTimeout: getEnvAsDuration("WRITE_TIMEOUT", 10*time.Second),

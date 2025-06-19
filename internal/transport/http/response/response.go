@@ -8,7 +8,7 @@ import (
 
 // TODO: implement as per RFC 7807
 
-func Json(w http.ResponseWriter, status int, data interface{}) {
+func JSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
@@ -16,15 +16,15 @@ func Json(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
-func Ok(w http.ResponseWriter, data interface{}) {
-	Json(w, http.StatusOK, data)
+func OK(w http.ResponseWriter, data interface{}) {
+	JSON(w, http.StatusOK, data)
 }
 
 func Err(w http.ResponseWriter, status int, msg string) {
 	type errorResponse struct {
 		Error string `json:"error"`
 	}
-	Json(w, status, errorResponse{Error: msg})
+	JSON(w, status, errorResponse{Error: msg})
 }
 
 func InternalServerError(w http.ResponseWriter, err error) {

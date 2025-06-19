@@ -12,7 +12,7 @@ import (
 
 // Port is the resolver for the port field.
 func (r *queryResolver) Port(ctx context.Context, id string) (*model.Port, error) {
-	port, err := r.PortService.GetPortById(id)
+	port, err := r.PortService.GetPortByID(id)
 	if err != nil {
 		return nil, err
 	}

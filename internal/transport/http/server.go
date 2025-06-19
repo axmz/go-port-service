@@ -17,7 +17,7 @@ import (
 )
 
 func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
-	h := handlers.NewHttpHandlers(s)
+	h := handlers.NewHTTPHandlers(s)
 
 	gqlsrv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		PortService: s,
@@ -33,14 +33,14 @@ func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
 
 	srv := &http.Server{
 		Handler:      mux,
-		Addr:         cfg.HttpServer.Port,
-		IdleTimeout:  cfg.HttpServer.IdleTimeout,
-		ReadTimeout:  cfg.HttpServer.ReadTimeout,
-		WriteTimeout: cfg.HttpServer.WriteTimeout,
+		Addr:         cfg.HTTPServer.Port,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+		ReadTimeout:  cfg.HTTPServer.ReadTimeout,
+		WriteTimeout: cfg.HTTPServer.WriteTimeout,
 	}
 
 	go func() {
-		log.Printf("Starting server on %s\n", cfg.HttpServer.Port)
+		log.Printf("Starting server on %s\n", cfg.HTTPServer.Port)
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("HTTP server ListenAndServe: %v", err)
 		}

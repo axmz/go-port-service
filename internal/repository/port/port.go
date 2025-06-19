@@ -22,7 +22,7 @@ func NewPortRepository(db InMem[*Port]) *PortRepository {
 	}
 }
 
-func (r PortRepository) GetPortById(id string) (*port.Port, error) {
+func (r PortRepository) GetPortByID(id string) (*port.Port, error) {
 	portDb, exists := r.db.Get(id)
 	if !exists {
 		return nil, port.ErrNotFound
@@ -64,7 +64,7 @@ func (r PortRepository) UploadPort(p *port.Port) error {
 	return nil
 }
 
-func (r PortRepository) DeletePortById(id string) (*port.Port, error) {
+func (r PortRepository) DeletePortByID(id string) (*port.Port, error) {
 	portDb, exists := r.db.Delete(id)
 	if !exists {
 		return nil, port.ErrNotFound

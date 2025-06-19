@@ -14,8 +14,8 @@ import (
 )
 
 type PortService interface {
-	GetPortById(id string) (*port.Port, error)
-	DeletePortById(id string) (*port.Port, error)
+	GetPortByID(id string) (*port.Port, error)
+	DeletePortByID(id string) (*port.Port, error)
 	GetAllPorts() ([]*port.Port, error)
 	GetPortsCount() int
 	UploadPort(*port.Port) error
@@ -25,7 +25,7 @@ type Handlers struct {
 	service PortService
 }
 
-func NewHttpHandlers(s PortService) *Handlers {
+func NewHTTPHandlers(s PortService) *Handlers {
 	return &Handlers{
 		service: s,
 	}
@@ -49,10 +49,10 @@ func (h *Handlers) GetAllPorts(w http.ResponseWriter, r *http.Request) {
 	for _, v := range data {
 		res = append(res, h.toPortResponse(v))
 	}
-	response.Ok(w, res)
+	response.OK(w, res)
 }
 
-func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetPortByID(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -60,7 +60,7 @@ func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p, err := h.service.GetPortById(id); err != nil {
+	if p, err := h.service.GetPortByID(id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {
@@ -68,13 +68,13 @@ func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		response.Ok(w, h.toPortResponse(p))
+		response.OK(w, h.toPortResponse(p))
 	}
 }
 
 func (h *Handlers) GetPortsCount(w http.ResponseWriter, r *http.Request) {
 	c := h.service.GetPortsCount()
-	response.Ok(w, c)
+	response.OK(w, c)
 }
 
 func readBody(r *http.Request, portCh chan PortRequest, errCh chan error, doneCh chan struct{}) {
@@ -145,7 +145,7 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 			}
 		case <-doneCh:
 			log.Println("data processed successfully")
-			response.Ok(w, countPorts)
+			response.OK(w, countPorts)
 			return
 		}
 	}
@@ -160,7 +160,7 @@ func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: extract this block?
-	if p, err := h.service.GetPortById(id); err != nil {
+	if p, err := h.service.GetPortByID(id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {
@@ -175,12 +175,12 @@ func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
 			response.BadRequest(w, err.Error())
 			return
 		} else {
-			response.Ok(w, h.toPortResponse(copy))
+			response.OK(w, h.toPortResponse(copy))
 		}
 	}
 }
 
-func (h *Handlers) DeletePortById(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) DeletePortByID(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -189,7 +189,7 @@ func (h *Handlers) DeletePortById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: reuse block?
-	if p, err := h.service.DeletePortById(id); err != nil {
+	if p, err := h.service.DeletePortByID(id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {
@@ -197,7 +197,7 @@ func (h *Handlers) DeletePortById(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		response.Ok(w, h.toPortResponse(p))
+		response.OK(w, h.toPortResponse(p))
 	}
 }
 
