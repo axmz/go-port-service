@@ -5,26 +5,26 @@ import (
 	"sync"
 )
 
-type InMemoryDB struct {
-	data map[string]any
+type InMemoryDB[T any] struct {
+	data map[string]T
 	mu   sync.RWMutex
 }
 
-func NewInMemoryDB() *InMemoryDB {
-	return &InMemoryDB{
-		data: make(map[string]any),
+func NewInMemoryDB[T any]() *InMemoryDB[T] {
+	return &InMemoryDB[T]{
+		data: make(map[string]T),
 	}
 }
 
-func (db *InMemoryDB) Get(key string) (any, bool) {
+func (db *InMemoryDB[T]) Get(key string) (T, bool) {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 	val, ok := db.data[key]
 	return val, ok
 }
 
-func (db *InMemoryDB) GetAll() []any {
-	res := make([]any, 0, len(db.data))
+func (db *InMemoryDB[T]) GetAll() []T {
+	res := make([]T, 0, len(db.data))
 
 	db.mu.RLock()
 	defer db.mu.RUnlock()
@@ -36,13 +36,13 @@ func (db *InMemoryDB) GetAll() []any {
 	return res
 }
 
-func (db *InMemoryDB) Put(key string, value any) {
+func (db *InMemoryDB[T]) Put(key string, value T) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	db.data[key] = value
 }
 
-func (db *InMemoryDB) Delete(key string) (any, bool) {
+func (db *InMemoryDB[T]) Delete(key string) (T, bool) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	temp, ok := db.data[key]
@@ -50,13 +50,13 @@ func (db *InMemoryDB) Delete(key string) (any, bool) {
 	return temp, ok
 }
 
-func (db *InMemoryDB) Len() int {
+func (db *InMemoryDB[T]) Len() int {
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 	return len(db.data)
 }
 
-func (db *InMemoryDB) Shutdown(ctx context.Context) error {
+func (db *InMemoryDB[T]) Shutdown(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()

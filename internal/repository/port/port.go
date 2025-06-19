@@ -4,19 +4,19 @@ import (
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
-type InMem interface {
-	Get(key string) (any, bool)
-	GetAll() []any
-	Put(key string, value any)
-	Delete(key string) (any, bool)
+type InMem[T any] interface {
+	Get(key string) (T, bool)
+	GetAll() []T
+	Put(key string, value T)
+	Delete(key string) (T, bool)
 	Len() int
 }
 
 type PortRepository struct {
-	db InMem
+	db InMem[*Port]
 }
 
-func NewPortRepository(db InMem) *PortRepository {
+func NewPortRepository(db InMem[*Port]) *PortRepository {
 	return &PortRepository{
 		db: db,
 	}
@@ -28,7 +28,7 @@ func (r PortRepository) GetPortById(id string) (*port.Port, error) {
 		return nil, port.ErrNotFound
 	}
 
-	p, err := fromRepositoryToDomain(portDb.(*Port))
+	p, err := fromRepositoryToDomain(portDb)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (r PortRepository) GetAllPorts() ([]*port.Port, error) {
 	res := make([]*port.Port, 0, len(arr))
 
 	for _, v := range arr {
-		p, err := fromRepositoryToDomain(v.(*Port))
+		p, err := fromRepositoryToDomain(v)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +70,7 @@ func (r PortRepository) DeletePortById(id string) (*port.Port, error) {
 		return nil, port.ErrNotFound
 	}
 
-	p, err := fromRepositoryToDomain(portDb.(*Port))
+	p, err := fromRepositoryToDomain(portDb)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ import (
 func run() error {
 	cfg := config.LoadConfig()
 
-	d := inmem.NewInMemoryDB()
+	d := inmem.NewInMemoryDB[*repo.Port]()
 
 	r := repo.NewPortRepository(d)
 

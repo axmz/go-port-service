@@ -6,6 +6,7 @@ This application covers topics like:
 - Middleware
 - Containerization
 - Deployment
+- Generics
 
 # TODO:
 <!-- create or update -->
@@ -13,6 +14,8 @@ This application covers topics like:
 <!-- add createAt modifiedAt to domain -->
 
 <!-- grapqhl -->
+
+<!-- generic inmem -->
 
 move .vscode
 
