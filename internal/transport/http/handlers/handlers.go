@@ -14,9 +14,9 @@ import (
 )
 
 type PortService interface {
-	GetPort(id string) (*port.Port, error)
+	GetPortById(id string) (*port.Port, error)
 	DeletePortById(id string) (*port.Port, error)
-	GetAllPorts() ([]string, error)
+	GetAllPorts() ([]*port.Port, error)
 	GetPortsCount() int
 	UploadPort(*port.Port) error
 }
@@ -45,7 +45,11 @@ func (h *Handlers) GetAllPorts(w http.ResponseWriter, r *http.Request) {
 		response.InternalServerError(w, err)
 		return
 	}
-	response.Ok(w, data)
+	res := make([]PortResponse, 0, len(data))
+	for _, v := range data {
+		res = append(res, h.toPortResponse(v))
+	}
+	response.Ok(w, res)
 }
 
 func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +60,7 @@ func (h *Handlers) GetPortById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p, err := h.service.GetPort(id); err != nil {
+	if p, err := h.service.GetPortById(id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {
@@ -156,7 +160,7 @@ func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: extract this block?
-	if p, err := h.service.GetPort(id); err != nil {
+	if p, err := h.service.GetPortById(id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {

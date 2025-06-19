@@ -6,7 +6,7 @@ import (
 
 type PortRepo interface {
 	GetPortById(id string) (*port.Port, error)
-	GetAllPorts() ([]string, error)
+	GetAllPorts() ([]*port.Port, error)
 	GetPortsCount() int
 	UploadPort(*port.Port) error
 	DeletePortById(id string) (*port.Port, error)
@@ -22,11 +22,11 @@ func NewPortService(r PortRepo) *PortService {
 	}
 }
 
-func (p *PortService) GetPort(id string) (*port.Port, error) {
+func (p *PortService) GetPortById(id string) (*port.Port, error) {
 	return p.repo.GetPortById(id)
 }
 
-func (p *PortService) GetAllPorts() ([]string, error) {
+func (p *PortService) GetAllPorts() ([]*port.Port, error) {
 	return p.repo.GetAllPorts()
 }
 

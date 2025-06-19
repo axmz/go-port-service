@@ -6,7 +6,7 @@ import (
 
 type InMem interface {
 	Get(key string) (any, bool)
-	GetAll() []string
+	GetAll() []any
 	Put(key string, value any)
 	Delete(key string) (any, bool)
 	Len() int
@@ -36,8 +36,19 @@ func (r PortRepository) GetPortById(id string) (*port.Port, error) {
 	return p, nil
 }
 
-func (r PortRepository) GetAllPorts() ([]string, error) {
-	return r.db.GetAll(), nil
+func (r PortRepository) GetAllPorts() ([]*port.Port, error) {
+	arr := r.db.GetAll()
+	res := make([]*port.Port, 0, len(arr))
+
+	for _, v := range arr {
+		p, err := fromRepositoryToDomain(v.(*Port))
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, p)
+	}
+
+	return res, nil
 }
 
 func (r PortRepository) GetPortsCount() int {

@@ -3,6 +3,8 @@ package port
 import (
 	"errors"
 
+	"slices"
+
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
@@ -32,11 +34,11 @@ func fromRepositoryToDomain(p *Port) (*port.Port, error) {
 		p.Code,
 		p.City,
 		p.Country,
-		append([]string(nil), p.Alias...),
-		append([]string(nil), p.Regions...),
-		append([]float64(nil), p.Coordinates...),
+		slices.Clone(p.Alias),
+		slices.Clone(p.Regions),
+		slices.Clone(p.Coordinates),
 		p.Province,
 		p.Timezone,
-		append([]string(nil), p.Unlocs...),
+		slices.Clone(p.Unlocs),
 	)
 }

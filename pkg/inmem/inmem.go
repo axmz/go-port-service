@@ -23,14 +23,14 @@ func (db *InMemoryDB) Get(key string) (any, bool) {
 	return val, ok
 }
 
-func (db *InMemoryDB) GetAll() []string {
-	res := make([]string, 0, len(db.data))
+func (db *InMemoryDB) GetAll() []any {
+	res := make([]any, 0, len(db.data))
 
 	db.mu.RLock()
 	defer db.mu.RUnlock()
 
-	for k := range db.data {
-		res = append(res, k)
+	for _, v := range db.data {
+		res = append(res, v)
 	}
 
 	return res
