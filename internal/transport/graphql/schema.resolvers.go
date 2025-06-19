@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/axmz/go-port-service/graph/model"
+	"github.com/axmz/go-port-service/internal/transport/graphql/model"
 )
 
 // Port is the resolver for the port field.

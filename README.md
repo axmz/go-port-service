@@ -1,7 +1,7 @@
 # go-port-service
 This application covers topics like:
-- hexagonal architecture
-- stream processing
+- Hexagonal architecture
+- Stream processing
 - CRUD
 - Middleware
 - Containerization
@@ -28,6 +28,7 @@ finish TODOs
 context everywhere
 
 SQL
+Redis
 
 group handlers
 

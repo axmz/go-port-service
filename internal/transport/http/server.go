@@ -8,9 +8,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/axmz/go-port-service/graph"
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/services/port"
+	graphql "github.com/axmz/go-port-service/internal/transport/graphql"
 	"github.com/axmz/go-port-service/internal/transport/http/handlers"
 	"github.com/axmz/go-port-service/internal/transport/http/router"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -19,7 +19,7 @@ import (
 func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
 	h := handlers.NewHTTPHandlers(s)
 
-	gqlsrv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+	gqlsrv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{
 		PortService: s,
 	}}))
 	gqlsrv.AddTransport(transport.Options{})

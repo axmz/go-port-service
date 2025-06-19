@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/axmz/go-port-service/graph/model"
+	"github.com/axmz/go-port-service/internal/transport/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -958,7 +958,7 @@ func (ec *executionContext) _Query_port(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.Port)
 	fc.Result = res
-	return ec.marshalOPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPort(ctx, field.Selections, res)
+	return ec.marshalOPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPort(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_port(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1037,7 +1037,7 @@ func (ec *executionContext) _Query_ports(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.([]*model.Port)
 	fc.Result = res
-	return ec.marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPortᚄ(ctx, field.Selections, res)
+	return ec.marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPortᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_ports(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3842,7 +3842,7 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPortᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Port) graphql.Marshaler {
+func (ec *executionContext) marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPortᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Port) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3866,7 +3866,7 @@ func (ec *executionContext) marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑport�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPort(ctx, sel, v[i])
+			ret[i] = ec.marshalNPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPort(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3886,7 +3886,7 @@ func (ec *executionContext) marshalNPort2ᚕᚖgithubᚗcomᚋaxmzᚋgoᚑport�
 	return ret
 }
 
-func (ec *executionContext) marshalNPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPort(ctx context.Context, sel ast.SelectionSet, v *model.Port) graphql.Marshaler {
+func (ec *executionContext) marshalNPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPort(ctx context.Context, sel ast.SelectionSet, v *model.Port) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4225,7 +4225,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋgraphᚋmodelᚐPort(ctx context.Context, sel ast.SelectionSet, v *model.Port) graphql.Marshaler {
+func (ec *executionContext) marshalOPort2ᚖgithubᚗcomᚋaxmzᚋgoᚑportᚑserviceᚋinternalᚋtransportᚋgraphqlᚋmodelᚐPort(ctx context.Context, sel ast.SelectionSet, v *model.Port) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

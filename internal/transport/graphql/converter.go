@@ -1,8 +1,8 @@
 package graph
 
 import (
-	"github.com/axmz/go-port-service/graph/model"
 	"github.com/axmz/go-port-service/internal/domain/port"
+	"github.com/axmz/go-port-service/internal/transport/graphql/model"
 )
 
 func convertToGraphQLPort(p *port.Port) *model.Port {
