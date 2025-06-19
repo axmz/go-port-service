@@ -33,14 +33,14 @@ func StartServer(cfg *config.Config, s *port.PortService) *http.Server {
 
 	srv := &http.Server{
 		Handler:      mux,
-		Addr:         cfg.Port,
-		IdleTimeout:  cfg.IdleTimeout,
-		ReadTimeout:  cfg.ReadTimeout,
-		WriteTimeout: cfg.WriteTimeout,
+		Addr:         cfg.HttpServer.Port,
+		IdleTimeout:  cfg.HttpServer.IdleTimeout,
+		ReadTimeout:  cfg.HttpServer.ReadTimeout,
+		WriteTimeout: cfg.HttpServer.WriteTimeout,
 	}
 
 	go func() {
-		log.Printf("Starting server on %s\n", cfg.Port)
+		log.Printf("Starting server on %s\n", cfg.HttpServer.Port)
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("HTTP server ListenAndServe: %v", err)
 		}
