@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"errors"
-
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
-func (h *Handlers) toPortResponse(p *port.Port) PortResponse {
+func (h *Handlers) fromDomainToResponse(p *port.Port) PortResponse {
 	r := PortResponse{
 		ID:          p.ID(),
 		Name:        p.Name(),
@@ -23,11 +21,8 @@ func (h *Handlers) toPortResponse(p *port.Port) PortResponse {
 	return r
 }
 
-func toDomain(p *PortRequest) (*port.Port, error) {
-	if p == nil {
-		return nil, errors.New("store port is nil")
-	}
-	return port.NewPort(
+func fromRequestToDomain(p *PortRequest) (*port.Port, error) {
+	return port.New(
 		p.ID,
 		p.Name,
 		p.Code,

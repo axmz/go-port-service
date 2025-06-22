@@ -19,6 +19,7 @@ import (
 )
 
 func Start(cfg *config.Config, s *port.PortService) *http.Server {
+	const op = "transport.http.server.Start"
 	h := handlers.NewHTTPHandlers(s)
 
 	gqlsrv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{
@@ -42,7 +43,7 @@ func Start(cfg *config.Config, s *port.PortService) *http.Server {
 	}
 
 	go func() {
-		slog.Info(fmt.Sprintf("Starting server on %s", cfg.HTTPServer.Port))
+		slog.Info(fmt.Sprintf("Starting server on %s", cfg.HTTPServer.Port), slog.String("op", op))
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatalf("HTTP server ListenAndServe: %v", err)
 		}

@@ -14,13 +14,15 @@ import (
 type Operation = func(ctx context.Context) error
 
 func Shutdown(timeout time.Duration, ops map[string]Operation) <-chan struct{} {
+	const op = "pkg.graceful.Shutdown"
 	wait := make(chan struct{})
+	log := slog.With(slog.String("op", op))
 	go func() {
 		s := make(chan os.Signal, 1)
 		signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 		<-s
 
-		slog.Info("shutting down")
+		log.Info("shutting down")
 
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
@@ -32,13 +34,13 @@ func Shutdown(timeout time.Duration, ops map[string]Operation) <-chan struct{} {
 			go func() {
 				defer wg.Done()
 
-				slog.Info(fmt.Sprintf("cleaning up: %s", key))
+				log.Info(fmt.Sprintf("cleaning up: %s", key))
 				if err := op(ctx); err != nil {
-					slog.Info(fmt.Sprintf("%s: clean up failed: %s", key, err.Error()))
+					log.Info(fmt.Sprintf("%s: clean up failed: %s", key, err.Error()))
 					return
 				}
 
-				slog.Info(fmt.Sprintf("%s was shutdown gracefully", key))
+				log.Info(fmt.Sprintf("%s was shutdown gracefully", key))
 			}()
 		}
 

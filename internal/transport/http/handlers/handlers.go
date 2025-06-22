@@ -1,8 +1,7 @@
 package handlers
 
-// TODO: split handlers into separate folders
-
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,11 +13,11 @@ import (
 )
 
 type PortService interface {
-	GetPortByID(id string) (*port.Port, error)
-	DeletePortByID(id string) (*port.Port, error)
-	GetAllPorts() ([]*port.Port, error)
-	GetPortsCount() int
-	UploadPort(*port.Port) error
+	GetPortByID(ctx context.Context, id string) (*port.Port, error)
+	DeletePortByID(ctx context.Context, id string) (*port.Port, error)
+	GetAllPorts(ctx context.Context) ([]*port.Port, error)
+	GetPortsCount(ctx context.Context) int
+	UploadPort(ctx context.Context, p *port.Port) error
 }
 
 type Handlers struct {
@@ -40,14 +39,14 @@ func (h *Handlers) HomePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetAllPorts(w http.ResponseWriter, r *http.Request) {
-	data, err := h.service.GetAllPorts()
+	data, err := h.service.GetAllPorts(r.Context())
 	if err != nil {
 		response.InternalServerError(w, err)
 		return
 	}
 	res := make([]PortResponse, 0, len(data))
 	for _, v := range data {
-		res = append(res, h.toPortResponse(v))
+		res = append(res, h.fromDomainToResponse(v))
 	}
 	response.OK(w, res)
 }
@@ -60,7 +59,7 @@ func (h *Handlers) GetPortByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p, err := h.service.GetPortByID(id); err != nil {
+	if p, err := h.service.GetPortByID(r.Context(), id); err != nil {
 		if errors.Is(err, port.ErrNotFound) {
 			response.NotFound(w)
 		} else {
@@ -68,12 +67,12 @@ func (h *Handlers) GetPortByID(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
-		response.OK(w, h.toPortResponse(p))
+		response.OK(w, h.fromDomainToResponse(p))
 	}
 }
 
 func (h *Handlers) GetPortsCount(w http.ResponseWriter, r *http.Request) {
-	c := h.service.GetPortsCount()
+	c := h.service.GetPortsCount(r.Context())
 	response.OK(w, c)
 }
 
@@ -117,7 +116,8 @@ func readBody(r *http.Request, portCh chan PortRequest, errCh chan error, doneCh
 }
 
 func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 50<<20) // TODO: take from config
+	const op = "transport.http.handlers.UploadPorts"
+	r.Body = http.MaxBytesReader(w, r.Body, 50<<20) // TODO: move to config or middleware
 
 	portCh := make(chan PortRequest)
 	errCh := make(chan error)
@@ -129,22 +129,23 @@ func (h *Handlers) UploadPorts(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-r.Context().Done():
-			slog.Info("request cancelled")
+			slog.Info("request cancelled", slog.String("op", op))
 			return
 		case err := <-errCh:
-			slog.Info(err.Error())
+			slog.Info(err.Error(), slog.String("op", op))
 			response.Err(w, http.StatusBadRequest, err.Error())
 			return
 		case p := <-portCh:
 			countPorts++
-			if portDomain, err := toDomain(&p); err != nil {
+			if portDomain, err := fromRequestToDomain(&p); err != nil {
 				response.Err(w, http.StatusBadRequest, err.Error())
-			} else if err := h.service.UploadPort(portDomain); err != nil {
+				return
+			} else if err := h.service.UploadPort(r.Context(), portDomain); err != nil {
 				response.BadRequest(w, err.Error())
 				return
 			}
 		case <-doneCh:
-			slog.Info("data processed successfully")
+			slog.Info("data processed successfully", slog.String("op", op))
 			response.OK(w, countPorts)
 			return
 		}
@@ -159,23 +160,18 @@ func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: extract this block?
-	if p, err := h.service.GetPortByID(id); err != nil {
-		if errors.Is(err, port.ErrNotFound) {
-			response.NotFound(w)
-		} else {
-			response.InternalServerError(w, err)
-		}
+	if p, err := h.service.GetPortByID(r.Context(), id); err != nil {
+		handleError(w, err)
 		return
 	} else {
 		copy, _ := p.Copy()
 		// TODO: impl granular update or complete replace
 		copy.SetName("TEST")
-		if err := h.service.UploadPort(copy); err != nil {
+		if err := h.service.UploadPort(r.Context(), copy); err != nil {
 			response.BadRequest(w, err.Error())
 			return
 		} else {
-			response.OK(w, h.toPortResponse(copy))
+			response.OK(w, h.fromDomainToResponse(copy))
 		}
 	}
 }
@@ -188,19 +184,23 @@ func (h *Handlers) DeletePortByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: reuse block?
-	if p, err := h.service.DeletePortByID(id); err != nil {
-		if errors.Is(err, port.ErrNotFound) {
-			response.NotFound(w)
-		} else {
-			response.InternalServerError(w, err)
-		}
+	if p, err := h.service.DeletePortByID(r.Context(), id); err != nil {
+		handleError(w, err)
 		return
 	} else {
-		response.OK(w, h.toPortResponse(p))
+		response.OK(w, h.fromDomainToResponse(p))
 	}
 }
 
 func (h *Handlers) Metrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Hello, metrics!")
+}
+
+func handleError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, port.ErrNotFound):
+		response.NotFound(w)
+	default:
+		response.InternalServerError(w, err)
+	}
 }

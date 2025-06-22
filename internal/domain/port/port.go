@@ -26,7 +26,7 @@ type Port struct {
 	unlocs      []string
 }
 
-func NewPort(
+func New(
 	id, name, code, city, country string,
 	alias, regions []string,
 	coords []float64,
@@ -34,13 +34,6 @@ func NewPort(
 	unlocs []string) (*Port, error) {
 
 	if err := validate(id, name, city, country); err != nil {
-		// TEST remove
-		if errors.Is(err, ErrValidation) {
-			fmt.Println("validation err")
-		}
-		if errors.Is(err, ErrRequired) {
-			fmt.Println("required err")
-		}
 		return nil, err
 	}
 
@@ -112,7 +105,7 @@ func (p *Port) Unlocs() []string {
 }
 
 func (p *Port) Copy() (*Port, error) {
-	return NewPort(
+	return New(
 		p.ID(),
 		p.Name(),
 		p.Code(),

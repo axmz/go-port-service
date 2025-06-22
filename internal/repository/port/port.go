@@ -1,15 +1,17 @@
 package port
 
 import (
+	"context"
+
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
 type InMem[T any] interface {
-	Get(key string) (T, bool)
-	GetAll() []T
-	Put(key string, value T)
-	Delete(key string) (T, bool)
-	Len() int
+	Get(ctx context.Context, key string) (T, bool)
+	GetAll(ctx context.Context) []T
+	Put(ctx context.Context, key string, value T)
+	Delete(ctx context.Context, key string) (T, bool)
+	Len(ctx context.Context) int
 }
 
 type PortRepository struct {
@@ -22,8 +24,8 @@ func New(db InMem[*Port]) *PortRepository {
 	}
 }
 
-func (r PortRepository) GetPortByID(id string) (*port.Port, error) {
-	portDb, exists := r.db.Get(id)
+func (r PortRepository) GetPortByID(ctx context.Context, id string) (*port.Port, error) {
+	portDb, exists := r.db.Get(ctx, id)
 	if !exists {
 		return nil, port.ErrNotFound
 	}
@@ -36,8 +38,8 @@ func (r PortRepository) GetPortByID(id string) (*port.Port, error) {
 	return p, nil
 }
 
-func (r PortRepository) GetAllPorts() ([]*port.Port, error) {
-	arr := r.db.GetAll()
+func (r PortRepository) GetAllPorts(ctx context.Context) ([]*port.Port, error) {
+	arr := r.db.GetAll(ctx)
 	res := make([]*port.Port, 0, len(arr))
 
 	for _, v := range arr {
@@ -51,21 +53,21 @@ func (r PortRepository) GetAllPorts() ([]*port.Port, error) {
 	return res, nil
 }
 
-func (r PortRepository) GetPortsCount() int {
-	return r.db.Len()
+func (r PortRepository) GetPortsCount(ctx context.Context) int {
+	return r.db.Len(ctx)
 }
 
-func (r PortRepository) UploadPort(p *port.Port) error {
+func (r PortRepository) UploadPort(ctx context.Context, p *port.Port) error {
 	portRepo, err := fromDomainToRepository(p)
 	if err != nil {
 		return err
 	}
-	r.db.Put(portRepo.ID, portRepo)
+	r.db.Put(ctx, portRepo.ID, portRepo)
 	return nil
 }
 
-func (r PortRepository) DeletePortByID(id string) (*port.Port, error) {
-	portDb, exists := r.db.Delete(id)
+func (r PortRepository) DeletePortByID(ctx context.Context, id string) (*port.Port, error) {
+	portDb, exists := r.db.Delete(ctx, id)
 	if !exists {
 		return nil, port.ErrNotFound
 	}

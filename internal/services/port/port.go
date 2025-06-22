@@ -1,15 +1,17 @@
 package port
 
 import (
+	"context"
+
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
 type PortRepo interface {
-	GetPortByID(id string) (*port.Port, error)
-	GetAllPorts() ([]*port.Port, error)
-	GetPortsCount() int
-	UploadPort(*port.Port) error
-	DeletePortByID(id string) (*port.Port, error)
+	GetPortByID(ctx context.Context, id string) (*port.Port, error)
+	GetAllPorts(ctx context.Context) ([]*port.Port, error)
+	GetPortsCount(ctx context.Context) int
+	UploadPort(ctx context.Context, p *port.Port) error
+	DeletePortByID(ctx context.Context, id string) (*port.Port, error)
 }
 
 type PortService struct {
@@ -22,22 +24,22 @@ func New(r PortRepo) *PortService {
 	}
 }
 
-func (p *PortService) GetPortByID(id string) (*port.Port, error) {
-	return p.repo.GetPortByID(id)
+func (p *PortService) GetPortByID(ctx context.Context, id string) (*port.Port, error) {
+	return p.repo.GetPortByID(ctx, id)
 }
 
-func (p *PortService) GetAllPorts() ([]*port.Port, error) {
-	return p.repo.GetAllPorts()
+func (p *PortService) GetAllPorts(ctx context.Context) ([]*port.Port, error) {
+	return p.repo.GetAllPorts(ctx)
 }
 
-func (p *PortService) GetPortsCount() int {
-	return p.repo.GetPortsCount()
+func (p *PortService) GetPortsCount(ctx context.Context) int {
+	return p.repo.GetPortsCount(ctx)
 }
 
-func (p *PortService) UploadPort(port *port.Port) error {
-	return p.repo.UploadPort(port)
+func (p *PortService) UploadPort(ctx context.Context, port *port.Port) error {
+	return p.repo.UploadPort(ctx, port)
 }
 
-func (p *PortService) DeletePortByID(id string) (*port.Port, error) {
-	return p.repo.DeletePortByID(id)
+func (p *PortService) DeletePortByID(ctx context.Context, id string) (*port.Port, error) {
+	return p.repo.DeletePortByID(ctx, id)
 }

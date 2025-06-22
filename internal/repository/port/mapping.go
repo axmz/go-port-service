@@ -28,7 +28,7 @@ func fromRepositoryToDomain(p *Port) (*port.Port, error) {
 	if p == nil {
 		return nil, errors.New("store port is nil")
 	}
-	return port.NewPort(
+	return port.New(
 		p.ID,
 		p.Name,
 		p.Code,

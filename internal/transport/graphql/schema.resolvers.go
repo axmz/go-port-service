@@ -12,7 +12,7 @@ import (
 
 // Port is the resolver for the port field.
 func (r *queryResolver) Port(ctx context.Context, id string) (*model.Port, error) {
-	port, err := r.PortService.GetPortByID(id)
+	port, err := r.PortService.GetPortByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +21,7 @@ func (r *queryResolver) Port(ctx context.Context, id string) (*model.Port, error
 
 // Ports is the resolver for the ports field.
 func (r *queryResolver) Ports(ctx context.Context) ([]*model.Port, error) {
-	ports, err := r.PortService.GetAllPorts()
+	ports, err := r.PortService.GetAllPorts(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (r *queryResolver) Ports(ctx context.Context) ([]*model.Port, error) {
 
 // PortsCount is the resolver for the portsCount field.
 func (r *queryResolver) PortsCount(ctx context.Context) (int32, error) {
-	return int32(r.PortService.GetPortsCount()), nil
+	return int32(r.PortService.GetPortsCount(ctx)), nil
 }
 
 // Query returns QueryResolver implementation.

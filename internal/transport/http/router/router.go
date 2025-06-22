@@ -20,7 +20,6 @@ func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
 	mux.Handle("/query", gqlsrv)
 	mux.HandleFunc("/metrics", h.Metrics)
 
-	// TODO: give same name in postman
 	mux.HandleFunc("POST /api/ports", h.UploadPorts)
 	mux.HandleFunc("GET /api/ports", h.GetAllPorts)
 	mux.HandleFunc("GET /api/ports/{id}", h.GetPortByID)
@@ -28,5 +27,5 @@ func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
 	mux.HandleFunc("PUT /api/ports/{id}", h.UpdatePort)
 	mux.HandleFunc("DELETE /api/ports/{id}", h.DeletePortByID)
 
-	return middleware.Logger(mux)
+	return middleware.Recoverer(middleware.RequestID(middleware.Logger(mux)))
 }

@@ -7,38 +7,17 @@ This application covers topics like:
 - Containerization
 - Deployment
 - Generics
+- GraphQL
 
 # TODO:
-<!-- create or update -->
-<!-- createdAt modifiedAt -->
-<!-- add createAt modifiedAt to domain -->
-
-<!-- grapqhl -->
-
-<!-- generic inmem -->
-
 move .vscode
 
 Add filtering support (e.g., filter by country).
 Add pagination.
 Add mutations: updatePort(id: ID!, input: PortInput!).
 
-finish TODOs
-
-context everywhere
-
-SQL
-Redis
-
-group handlers
-flatten?
-
 tests, order, duplicate...
 
-check copy
-make sure consistency * vs &
-
-logger
 makefile
 docker compose
 
