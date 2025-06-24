@@ -15,6 +15,7 @@ type Port struct {
 	Timezone    string
 	Unlocs      []string
 
+	// TODO: use these fields.
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

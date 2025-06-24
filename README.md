@@ -16,10 +16,12 @@ Add filtering support (e.g., filter by country).
 Add pagination.
 Add mutations: updatePort(id: ID!, input: PortInput!).
 
-tests, order, duplicate...
-
-makefile
+makefile, cover
 docker compose
 
 move all postman files
 deploy
+
+extract handlers and routes for port
+linter
+metrics
