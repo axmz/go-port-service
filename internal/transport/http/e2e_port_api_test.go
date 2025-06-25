@@ -10,6 +10,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	repository "github.com/axmz/go-port-service/internal/repository/port"
 	services "github.com/axmz/go-port-service/internal/services/port"
 	handlers "github.com/axmz/go-port-service/internal/transport/http/handlers"
@@ -34,21 +37,17 @@ func TestE2E_PortAPI(t *testing.T) {
 
 	// Load ports.json
 	portsJson, err := os.ReadFile(portsJsonPath)
-	if err != nil {
-		t.Fatalf("failed to read ports.json: %v", err)
-	}
+	require.NoError(t, err, "failed to read ports.json")
 
 	t.Run("upload ports", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/ports", bytes.NewReader(portsJson))
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
 		resp := response.Response{}
-		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to unmarshal upload response: %v", err)
-		}
-		if resp.Status != "OK" || resp.Data != portsCount {
-			t.Fatalf("expected status OK and data %f, got status %s and data %d", portsCount, resp.Status, resp.Data)
-		}
+		err := json.Unmarshal(w.Body.Bytes(), &resp)
+		require.NoError(t, err, "failed to unmarshal upload response")
+		assert.Equal(t, "OK", resp.Status)
+		assert.Equal(t, portsCount, resp.Data)
 	})
 
 	t.Run("get port by id", func(t *testing.T) {
@@ -56,29 +55,20 @@ func TestE2E_PortAPI(t *testing.T) {
 		req.SetPathValue("id", sampleID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected 200 on get by id, got %d", w.Code)
-		}
+		assert.Equal(t, http.StatusOK, w.Code, "expected 200 on get by id")
 		body, _ := io.ReadAll(w.Body)
-		if !bytes.Contains(body, []byte(sampleID)) {
-			t.Errorf("expected response to contain port ID %s", sampleID)
-		}
+		assert.Contains(t, string(body), sampleID, "expected response to contain port ID")
 	})
 
 	getPortsCount := func(t *testing.T, want float64) {
 		req := httptest.NewRequest("GET", "/api/ports/count", nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected 200 on count, got %d", w.Code)
-		}
+		assert.Equal(t, http.StatusOK, w.Code, "expected 200 on count")
 		resp := response.Response{}
-		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-			t.Fatalf("failed to decode count: %v", err)
-		}
-		if resp.Data != want {
-			t.Errorf("expected count %f, got %d", want, resp.Data)
-		}
+		err := json.Unmarshal(w.Body.Bytes(), &resp)
+		require.NoError(t, err, "failed to decode count")
+		assert.Equal(t, want, resp.Data)
 	}
 
 	t.Run("get ports count", func(t *testing.T) {
@@ -90,9 +80,7 @@ func TestE2E_PortAPI(t *testing.T) {
 		req.SetPathValue("id", sampleID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("expected 200 on delete, got %d", w.Code)
-		}
+		assert.Equal(t, http.StatusOK, w.Code, "expected 200 on delete")
 	})
 
 	t.Run("get ports count after delete", func(t *testing.T) {

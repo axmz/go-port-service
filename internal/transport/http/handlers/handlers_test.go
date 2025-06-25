@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/axmz/go-port-service/internal/domain/port"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockPortService struct {
@@ -49,9 +50,7 @@ func TestUploadPorts_Success(t *testing.T) {
 
 	h.UploadPorts(w, req)
 
-	if w.Code != http.StatusOK {
-		t.Errorf("expected 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestUploadPorts_BadJSON(t *testing.T) {
@@ -63,9 +62,7 @@ func TestUploadPorts_BadJSON(t *testing.T) {
 
 	h.UploadPorts(w, req)
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected 400, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestGetAllPorts(t *testing.T) {
@@ -77,9 +74,7 @@ func TestGetAllPorts(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/ports", nil)
 	w := httptest.NewRecorder()
 	h.GetAllPorts(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("expected 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestGetAllPorts_Error(t *testing.T) {
@@ -91,9 +86,7 @@ func TestGetAllPorts_Error(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/ports", nil)
 	w := httptest.NewRecorder()
 	h.GetAllPorts(w, req)
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestGetPortByID(t *testing.T) {
@@ -106,9 +99,7 @@ func TestGetPortByID(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.GetPortByID(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("expected 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestGetPortByID_NotFound(t *testing.T) {
@@ -121,9 +112,7 @@ func TestGetPortByID_NotFound(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.GetPortByID(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Errorf("expected 404, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestGetPortByID_Error(t *testing.T) {
@@ -136,9 +125,7 @@ func TestGetPortByID_Error(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.GetPortByID(w, req)
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
 func TestGetPortsCount(t *testing.T) {
@@ -150,9 +137,7 @@ func TestGetPortsCount(t *testing.T) {
 	req := httptest.NewRequest("GET", "/api/ports/count", nil)
 	w := httptest.NewRecorder()
 	h.GetPortsCount(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("expected 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestDeletePortByID(t *testing.T) {
@@ -165,9 +150,7 @@ func TestDeletePortByID(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.DeletePortByID(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("expected 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestDeletePortByID_NotFound(t *testing.T) {
@@ -180,9 +163,7 @@ func TestDeletePortByID_NotFound(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.DeletePortByID(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Errorf("expected 404, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
 func TestDeletePortByID_Error(t *testing.T) {
@@ -195,7 +176,5 @@ func TestDeletePortByID_Error(t *testing.T) {
 	req.SetPathValue("id", "123")
 	w := httptest.NewRecorder()
 	h.DeletePortByID(w, req)
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("expected 500, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

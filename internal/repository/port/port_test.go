@@ -2,10 +2,11 @@ package port
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	domain "github.com/axmz/go-port-service/internal/domain/port"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type mockInMem struct {
@@ -56,97 +57,73 @@ func testRepoPort() *Port {
 	}
 }
 
-func TestPortRepository_UploadAndGetPortByID(t *testing.T) {
-	t.Parallel()
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
-	p := testDomainPort()
+func TestPortRepository(t *testing.T) {
+	t.Run("UploadAndGetPortByID", func(t *testing.T) {
+		t.Parallel()
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
+		p := testDomainPort()
 
-	// Upload
-	if err := repo.UploadPort(ctx, p); err != nil {
-		t.Fatalf("UploadPort failed: %v", err)
-	}
+		require.NoError(t, repo.UploadPort(ctx, p), "UploadPort failed")
 
-	// Get
-	got, err := repo.GetPortByID(ctx, "id1")
-	if err != nil {
-		t.Fatalf("GetPortByID failed: %v", err)
-	}
-	if got.ID() != p.ID() {
-		t.Errorf("expected ID %s, got %s", p.ID(), got.ID())
-	}
-}
+		got, err := repo.GetPortByID(ctx, "id1")
+		require.NoError(t, err, "GetPortByID failed")
+		assert.Equal(t, p.ID(), got.ID(), "expected IDs to match")
+	})
 
-func TestPortRepository_GetPortByID_NotFound(t *testing.T) {
-	t.Parallel()
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
+	t.Run("GetPortByID_NotFound", func(t *testing.T) {
+		t.Parallel()
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
 
-	_, err := repo.GetPortByID(ctx, "notfound")
-	if !errors.Is(err, domain.ErrNotFound) {
-		t.Errorf("expected ErrNotFound, got %v", err)
-	}
-}
+		_, err := repo.GetPortByID(ctx, "notfound")
+		assert.ErrorIs(t, err, domain.ErrNotFound)
+	})
 
-func TestPortRepository_GetAllPorts(t *testing.T) {
-	t.Parallel()
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
-	p := testDomainPort()
-	_ = repo.UploadPort(ctx, p)
+	t.Run("GetAllPorts", func(t *testing.T) {
+		t.Parallel()
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
+		p := testDomainPort()
+		_ = repo.UploadPort(ctx, p)
 
-	ports, err := repo.GetAllPorts(ctx)
-	if err != nil {
-		t.Fatalf("GetAllPorts failed: %v", err)
-	}
-	if len(ports) != 1 {
-		t.Errorf("expected 1 port, got %d", len(ports))
-	}
-}
+		ports, err := repo.GetAllPorts(ctx)
+		require.NoError(t, err, "GetAllPorts failed")
+		assert.Len(t, ports, 1)
+	})
 
-func TestPortRepository_GetPortsCount(t *testing.T) {
-	t.Parallel()
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
-	if repo.GetPortsCount(ctx) != 0 {
-		t.Errorf("expected count 0")
-	}
-	_ = repo.UploadPort(ctx, testDomainPort())
-	if repo.GetPortsCount(ctx) != 1 {
-		t.Errorf("expected count 1")
-	}
-}
+	t.Run("GetPortsCount", func(t *testing.T) {
+		t.Parallel()
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
+		assert.Equal(t, 0, repo.GetPortsCount(ctx), "expected count 0")
+		_ = repo.UploadPort(ctx, testDomainPort())
+		assert.Equal(t, 1, repo.GetPortsCount(ctx), "expected count 1")
+	})
 
-func TestPortRepository_DeletePortByID(t *testing.T) {
-	t.Parallel()
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
-	_ = repo.UploadPort(ctx, testDomainPort())
+	t.Run("DeletePortByID", func(t *testing.T) {
+		t.Parallel()
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
+		_ = repo.UploadPort(ctx, testDomainPort())
 
-	p, err := repo.DeletePortByID(ctx, "id1")
-	if err != nil {
-		t.Fatalf("DeletePortByID failed: %v", err)
-	}
-	if p.ID() != "id1" {
-		t.Errorf("expected deleted ID 'id1', got %s", p.ID())
-	}
-	_, err = repo.GetPortByID(ctx, "id1")
-	if !errors.Is(err, domain.ErrNotFound) {
-		t.Errorf("expected ErrNotFound after delete, got %v", err)
-	}
-}
+		p, err := repo.DeletePortByID(ctx, "id1")
+		require.NoError(t, err, "DeletePortByID failed")
+		assert.Equal(t, "id1", p.ID(), "expected deleted ID 'id1'")
+		_, err = repo.GetPortByID(ctx, "id1")
+		assert.ErrorIs(t, err, domain.ErrNotFound)
+	})
 
-func TestPortRepository_DeletePortByID_NotFound(t *testing.T) {
-	mem := newMockInMem()
-	repo := New(mem)
-	ctx := context.Background()
-	_, err := repo.DeletePortByID(ctx, "notfound")
-	if !errors.Is(err, domain.ErrNotFound) {
-		t.Errorf("expected ErrNotFound, got %v", err)
-	}
+	t.Run("DeletePortByID_NotFound", func(t *testing.T) {
+		mem := newMockInMem()
+		repo := New(mem)
+		ctx := context.Background()
+		_, err := repo.DeletePortByID(ctx, "notfound")
+		assert.ErrorIs(t, err, domain.ErrNotFound)
+	})
 }
