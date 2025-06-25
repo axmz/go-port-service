@@ -20,12 +20,12 @@ func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
 	mux.Handle("/query", gqlsrv)
 	mux.HandleFunc("/metrics", h.Metrics)
 
-	mux.HandleFunc("POST /api/ports", h.UploadPorts)
-	mux.HandleFunc("GET /api/ports", h.GetAllPorts)
-	mux.HandleFunc("GET /api/ports/{id}", h.GetPortByID)
-	mux.HandleFunc("GET /api/ports/count", h.GetPortsCount)
-	mux.HandleFunc("PUT /api/ports/{id}", h.UpdatePort)
-	mux.HandleFunc("DELETE /api/ports/{id}", h.DeletePortByID)
+	mux.HandleFunc("POST /api/ports", h.Ports.Upload)
+	mux.HandleFunc("GET /api/ports", h.Ports.GetAll)
+	mux.HandleFunc("GET /api/ports/{id}", h.Ports.Get)
+	mux.HandleFunc("GET /api/ports/count", h.Ports.Count)
+	mux.HandleFunc("PUT /api/ports/{id}", h.Ports.UpdatePort)
+	mux.HandleFunc("DELETE /api/ports/{id}", h.Ports.Delete)
 
 	return middleware.Recoverer(middleware.RequestID(middleware.Logger(mux)))
 }

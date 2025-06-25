@@ -14,17 +14,17 @@ type InMem[T any] interface {
 	Len(ctx context.Context) int
 }
 
-type PortRepository struct {
+type Repository struct {
 	db InMem[*Port]
 }
 
-func New(db InMem[*Port]) *PortRepository {
-	return &PortRepository{
+func New(db InMem[*Port]) *Repository {
+	return &Repository{
 		db: db,
 	}
 }
 
-func (r PortRepository) GetPortByID(ctx context.Context, id string) (*port.Port, error) {
+func (r Repository) Get(ctx context.Context, id string) (*port.Port, error) {
 	portDb, exists := r.db.Get(ctx, id)
 	if !exists {
 		return nil, port.ErrNotFound
@@ -38,7 +38,7 @@ func (r PortRepository) GetPortByID(ctx context.Context, id string) (*port.Port,
 	return p, nil
 }
 
-func (r PortRepository) GetAllPorts(ctx context.Context) ([]*port.Port, error) {
+func (r Repository) GetAll(ctx context.Context) ([]*port.Port, error) {
 	arr := r.db.GetAll(ctx)
 	res := make([]*port.Port, 0, len(arr))
 
@@ -53,11 +53,11 @@ func (r PortRepository) GetAllPorts(ctx context.Context) ([]*port.Port, error) {
 	return res, nil
 }
 
-func (r PortRepository) GetPortsCount(ctx context.Context) int {
+func (r Repository) Count(ctx context.Context) int {
 	return r.db.Len(ctx)
 }
 
-func (r PortRepository) UploadPort(ctx context.Context, p *port.Port) error {
+func (r Repository) Upload(ctx context.Context, p *port.Port) error {
 	portRepo, err := fromDomainToRepository(p)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (r PortRepository) UploadPort(ctx context.Context, p *port.Port) error {
 	return nil
 }
 
-func (r PortRepository) DeletePortByID(ctx context.Context, id string) (*port.Port, error) {
+func (r Repository) Delete(ctx context.Context, id string) (*port.Port, error) {
 	portDb, exists := r.db.Delete(ctx, id)
 	if !exists {
 		return nil, port.ErrNotFound

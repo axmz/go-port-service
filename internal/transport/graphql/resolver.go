@@ -7,5 +7,5 @@ import "github.com/axmz/go-port-service/internal/services/port"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	PortService *port.PortService
+	PortService *port.Service
 }

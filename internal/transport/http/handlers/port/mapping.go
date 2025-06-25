@@ -1,11 +1,11 @@
-package handlers
+package port
 
 import (
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
-func (h *Handlers) fromDomainToResponse(p *port.Port) PortResponse {
-	r := PortResponse{
+func (h *Handlers) fromDomainToResponse(p *port.Port) Response {
+	r := Response{
 		ID:          p.ID(),
 		Name:        p.Name(),
 		City:        p.City(),
@@ -21,7 +21,7 @@ func (h *Handlers) fromDomainToResponse(p *port.Port) PortResponse {
 	return r
 }
 
-func fromRequestToDomain(p *PortRequest) (*port.Port, error) {
+func fromRequestToDomain(p *Request) (*port.Port, error) {
 	return port.New(
 		p.ID,
 		p.Name,

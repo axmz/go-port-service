@@ -6,40 +6,40 @@ import (
 	"github.com/axmz/go-port-service/internal/domain/port"
 )
 
-type PortRepo interface {
-	GetPortByID(ctx context.Context, id string) (*port.Port, error)
-	GetAllPorts(ctx context.Context) ([]*port.Port, error)
-	GetPortsCount(ctx context.Context) int
-	UploadPort(ctx context.Context, p *port.Port) error
-	DeletePortByID(ctx context.Context, id string) (*port.Port, error)
+type PortRepository interface {
+	Get(ctx context.Context, id string) (*port.Port, error)
+	GetAll(ctx context.Context) ([]*port.Port, error)
+	Count(ctx context.Context) int
+	Upload(ctx context.Context, p *port.Port) error
+	Delete(ctx context.Context, id string) (*port.Port, error)
 }
 
-type PortService struct {
-	repo PortRepo
+type Service struct {
+	port PortRepository
 }
 
-func New(r PortRepo) *PortService {
-	return &PortService{
-		repo: r,
+func New(r PortRepository) *Service {
+	return &Service{
+		port: r,
 	}
 }
 
-func (p *PortService) GetPortByID(ctx context.Context, id string) (*port.Port, error) {
-	return p.repo.GetPortByID(ctx, id)
+func (p *Service) Get(ctx context.Context, id string) (*port.Port, error) {
+	return p.port.Get(ctx, id)
 }
 
-func (p *PortService) GetAllPorts(ctx context.Context) ([]*port.Port, error) {
-	return p.repo.GetAllPorts(ctx)
+func (p *Service) GetAll(ctx context.Context) ([]*port.Port, error) {
+	return p.port.GetAll(ctx)
 }
 
-func (p *PortService) GetPortsCount(ctx context.Context) int {
-	return p.repo.GetPortsCount(ctx)
+func (p *Service) Count(ctx context.Context) int {
+	return p.port.Count(ctx)
 }
 
-func (p *PortService) UploadPort(ctx context.Context, port *port.Port) error {
-	return p.repo.UploadPort(ctx, port)
+func (p *Service) Upload(ctx context.Context, port *port.Port) error {
+	return p.port.Upload(ctx, port)
 }
 
-func (p *PortService) DeletePortByID(ctx context.Context, id string) (*port.Port, error) {
-	return p.repo.DeletePortByID(ctx, id)
+func (p *Service) Delete(ctx context.Context, id string) (*port.Port, error) {
+	return p.port.Delete(ctx, id)
 }

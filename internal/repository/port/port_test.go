@@ -58,72 +58,72 @@ func testRepoPort() *Port {
 }
 
 func TestPortRepository(t *testing.T) {
-	t.Run("UploadAndGetPortByID", func(t *testing.T) {
+	t.Run("UploadAndGet", func(t *testing.T) {
 		t.Parallel()
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
 		p := testDomainPort()
 
-		require.NoError(t, repo.UploadPort(ctx, p), "UploadPort failed")
+		require.NoError(t, repo.Upload(ctx, p), "Upload failed")
 
-		got, err := repo.GetPortByID(ctx, "id1")
-		require.NoError(t, err, "GetPortByID failed")
+		got, err := repo.Get(ctx, "id1")
+		require.NoError(t, err, "Get failed")
 		assert.Equal(t, p.ID(), got.ID(), "expected IDs to match")
 	})
 
-	t.Run("GetPortByID_NotFound", func(t *testing.T) {
+	t.Run("Get_NotFound", func(t *testing.T) {
 		t.Parallel()
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
 
-		_, err := repo.GetPortByID(ctx, "notfound")
+		_, err := repo.Get(ctx, "notfound")
 		assert.ErrorIs(t, err, domain.ErrNotFound)
 	})
 
-	t.Run("GetAllPorts", func(t *testing.T) {
+	t.Run("GetAll", func(t *testing.T) {
 		t.Parallel()
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
 		p := testDomainPort()
-		_ = repo.UploadPort(ctx, p)
+		_ = repo.Upload(ctx, p)
 
-		ports, err := repo.GetAllPorts(ctx)
-		require.NoError(t, err, "GetAllPorts failed")
+		ports, err := repo.GetAll(ctx)
+		require.NoError(t, err, "GetAll failed")
 		assert.Len(t, ports, 1)
 	})
 
-	t.Run("GetPortsCount", func(t *testing.T) {
+	t.Run("Count", func(t *testing.T) {
 		t.Parallel()
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
-		assert.Equal(t, 0, repo.GetPortsCount(ctx), "expected count 0")
-		_ = repo.UploadPort(ctx, testDomainPort())
-		assert.Equal(t, 1, repo.GetPortsCount(ctx), "expected count 1")
+		assert.Equal(t, 0, repo.Count(ctx), "expected count 0")
+		_ = repo.Upload(ctx, testDomainPort())
+		assert.Equal(t, 1, repo.Count(ctx), "expected count 1")
 	})
 
-	t.Run("DeletePortByID", func(t *testing.T) {
+	t.Run("Delete", func(t *testing.T) {
 		t.Parallel()
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
-		_ = repo.UploadPort(ctx, testDomainPort())
+		_ = repo.Upload(ctx, testDomainPort())
 
-		p, err := repo.DeletePortByID(ctx, "id1")
-		require.NoError(t, err, "DeletePortByID failed")
+		p, err := repo.Delete(ctx, "id1")
+		require.NoError(t, err, "Delete failed")
 		assert.Equal(t, "id1", p.ID(), "expected deleted ID 'id1'")
-		_, err = repo.GetPortByID(ctx, "id1")
+		_, err = repo.Get(ctx, "id1")
 		assert.ErrorIs(t, err, domain.ErrNotFound)
 	})
 
-	t.Run("DeletePortByID_NotFound", func(t *testing.T) {
+	t.Run("Delete_NotFound", func(t *testing.T) {
 		mem := newMockInMem()
 		repo := New(mem)
 		ctx := context.Background()
-		_, err := repo.DeletePortByID(ctx, "notfound")
+		_, err := repo.Delete(ctx, "notfound")
 		assert.ErrorIs(t, err, domain.ErrNotFound)
 	})
 }

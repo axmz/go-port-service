@@ -15,7 +15,7 @@ import (
 
 	repository "github.com/axmz/go-port-service/internal/repository/port"
 	services "github.com/axmz/go-port-service/internal/services/port"
-	handlers "github.com/axmz/go-port-service/internal/transport/http/handlers"
+	"github.com/axmz/go-port-service/internal/transport/http/handlers"
 	"github.com/axmz/go-port-service/internal/transport/http/response"
 	router "github.com/axmz/go-port-service/internal/transport/http/router"
 	"github.com/axmz/go-port-service/pkg/inmem"
@@ -32,7 +32,7 @@ func TestE2E_PortAPI(t *testing.T) {
 	db := inmem.New[*repository.Port]()
 	repo := repository.New(db)
 	svc := services.New(repo)
-	h := handlers.NewHTTPHandlers(svc)
+	h := handlers.New(svc)
 	r := router.Router(h, nil)
 
 	// Load ports.json
@@ -60,7 +60,7 @@ func TestE2E_PortAPI(t *testing.T) {
 		assert.Contains(t, string(body), sampleID, "expected response to contain port ID")
 	})
 
-	getPortsCount := func(t *testing.T, want float64) {
+	Count := func(t *testing.T, want float64) {
 		req := httptest.NewRequest("GET", "/api/ports/count", nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, req)
@@ -72,7 +72,7 @@ func TestE2E_PortAPI(t *testing.T) {
 	}
 
 	t.Run("get ports count", func(t *testing.T) {
-		getPortsCount(t, portsCount)
+		Count(t, portsCount)
 	})
 
 	t.Run("delete port by id", func(t *testing.T) {
@@ -84,6 +84,6 @@ func TestE2E_PortAPI(t *testing.T) {
 	})
 
 	t.Run("get ports count after delete", func(t *testing.T) {
-		getPortsCount(t, portsCount-1)
+		Count(t, portsCount-1)
 	})
 }
