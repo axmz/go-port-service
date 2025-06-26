@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	domain "github.com/axmz/go-port-service/internal/domain/port"
+	"github.com/axmz/go-port-service/internal/domain/port"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,8 +43,8 @@ func (m *mockInMem) Len(ctx context.Context) int {
 }
 
 // helpers for conversion
-func testDomainPort() *domain.Port {
-	p, _ := domain.New("id1", "name", "code", "city", "country", nil, nil, nil, "", "", nil)
+func testDomainPort() *port.Port {
+	p, _ := port.New("id1", "name", "code", "city", "country", nil, nil, nil, "", "", nil)
 	return p
 }
 func testRepoPort() *Port {
@@ -79,7 +79,7 @@ func TestPortRepository(t *testing.T) {
 		ctx := context.Background()
 
 		_, err := repo.Get(ctx, "notfound")
-		assert.ErrorIs(t, err, domain.ErrNotFound)
+		assert.ErrorIs(t, err, port.ErrNotFound)
 	})
 
 	t.Run("GetAll", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestPortRepository(t *testing.T) {
 		require.NoError(t, err, "Delete failed")
 		assert.Equal(t, "id1", p.ID(), "expected deleted ID 'id1'")
 		_, err = repo.Get(ctx, "id1")
-		assert.ErrorIs(t, err, domain.ErrNotFound)
+		assert.ErrorIs(t, err, port.ErrNotFound)
 	})
 
 	t.Run("Delete_NotFound", func(t *testing.T) {
@@ -124,6 +124,6 @@ func TestPortRepository(t *testing.T) {
 		repo := New(mem)
 		ctx := context.Background()
 		_, err := repo.Delete(ctx, "notfound")
-		assert.ErrorIs(t, err, domain.ErrNotFound)
+		assert.ErrorIs(t, err, port.ErrNotFound)
 	})
 }
