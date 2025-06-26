@@ -9,13 +9,13 @@ import (
 
 type Config struct {
 	Env             string
-	DBURL           string
-	LogLevel        string
 	GracefulTimeout time.Duration
 	HTTPServer      HTTPServer
 }
 
 type HTTPServer struct {
+	Protocol     string
+	Host         string
 	Port         string
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
@@ -25,10 +25,10 @@ type HTTPServer struct {
 func MustLoad() *Config {
 	return &Config{
 		Env:             getEnv("APP_ENV", "local"),
-		DBURL:           getEnv("DATABASE_URL", "postgres://localhost:5432/mydb"),
-		LogLevel:        getEnv("LOG_LEVEL", "info"),
 		GracefulTimeout: getEnvAsDuration("GRACEFUL_TIMEOUT", 2*time.Second),
 		HTTPServer: HTTPServer{
+			Protocol:     getEnv("PROTOCOL", "http"),
+			Host:         getEnv("HOST", "localhost"),
 			Port:         getEnv("PORT", ":8080"),
 			ReadTimeout:  getEnvAsDuration("READ_TIMEOUT", 5*time.Second),
 			WriteTimeout: getEnvAsDuration("WRITE_TIMEOUT", 10*time.Second),
