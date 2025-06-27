@@ -10,20 +10,27 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/alexedwards/scs/v2"
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/services/port"
 	graphql "github.com/axmz/go-port-service/internal/transport/graphql"
 	"github.com/axmz/go-port-service/internal/transport/http/handlers"
+	"github.com/axmz/go-port-service/internal/transport/http/handlers/webauthn"
 	"github.com/axmz/go-port-service/internal/transport/http/router"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func Start(cfg *config.Config, s *port.Service) *http.Server {
+func Start(
+	cfg *config.Config,
+	portSvc *port.Service,
+	webauthnSvc webauthn.WebAuthnService,
+	session webauthn.SessionManager,
+) *http.Server {
 	const op = "transport.http.server.Start"
-	h := handlers.New(s)
+	h := handlers.New(portSvc, webauthnSvc, session)
 
 	gqlsrv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{
-		PortService: s,
+		PortService: portSvc,
 	}}))
 	gqlsrv.AddTransport(transport.Options{})
 	gqlsrv.AddTransport(transport.GET{})
@@ -32,7 +39,7 @@ func Start(cfg *config.Config, s *port.Service) *http.Server {
 	gqlsrv.Use(extension.Introspection{})
 	gqlsrv.Use(extension.AutomaticPersistedQuery{Cache: lru.New[string](100)})
 
-	mux := router.Router(h, gqlsrv)
+	mux := router.Router(h, gqlsrv, (session).(*scs.SessionManager))
 
 	srv := &http.Server{
 		Handler:      mux,

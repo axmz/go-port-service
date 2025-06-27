@@ -5,17 +5,20 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/alexedwards/scs/v2"
 	"github.com/axmz/go-port-service/internal/transport/http/handlers"
 	"github.com/axmz/go-port-service/internal/transport/http/middleware"
 )
 
-func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
-	fs := http.FileServer(http.Dir("../../static"))
+func Router(h *handlers.Handlers, gqlsrv *handler.Server, session *scs.SessionManager) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
 	mux.HandleFunc("/", h.HomePage)
+	privateHandler := middleware.LoggedInMiddleware(session, http.HandlerFunc(h.PrivatePage))
+	mux.Handle("/private", privateHandler)
+	// mux.HandleFunc("/private", h.PrivatePage)
 	mux.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	mux.Handle("/query", gqlsrv)
 	mux.HandleFunc("/metrics", h.Metrics)
@@ -27,5 +30,10 @@ func Router(h *handlers.Handlers, gqlsrv *handler.Server) http.Handler {
 	mux.HandleFunc("PUT /api/ports/{id}", h.Ports.UpdatePort)
 	mux.HandleFunc("DELETE /api/ports/{id}", h.Ports.Delete)
 
-	return middleware.Recoverer(middleware.RequestID(middleware.Logger(mux)))
+	mux.HandleFunc("POST /api/webauth/register/begin", h.WebAuthn.BeginRegistration)
+	mux.HandleFunc("POST /api/webauth/register/finish", h.WebAuthn.FinishRegistration)
+	mux.HandleFunc("POST /api/webauth/login/begin", h.WebAuthn.BeginLogin)
+	mux.HandleFunc("POST /api/webauth/login/finish", h.WebAuthn.FinishLogin)
+
+	return middleware.Recoverer(session.LoadAndSave(middleware.RequestID(middleware.Logger(mux))))
 }

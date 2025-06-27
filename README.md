@@ -25,3 +25,6 @@ deploy
 extract handlers and routes for port
 linter
 metrics
+
+logout
+style home: add buttons, description

@@ -8,6 +8,10 @@ import (
 	"runtime/debug"
 	"sync/atomic"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	wah "github.com/axmz/go-port-service/internal/transport/http/handlers/webauthn"
+	"github.com/go-webauthn/webauthn/webauthn"
 )
 
 var (
@@ -96,6 +100,30 @@ func Recoverer(next http.Handler) http.Handler {
 			}
 		}()
 
+		next.ServeHTTP(w, r)
+	})
+}
+
+func LoggedInMiddleware(session *scs.SessionManager, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s, ok := session.Get(r.Context(), wah.WebauthSessionKey).(webauthn.SessionData)
+		if !ok {
+			slog.Error("session not found",
+				slog.String("op", "LoggedInMiddleware"),
+				slog.String("req_id", GetReqID(r.Context())),
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
+			)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if s.UserID == nil { // check expired?
+			// Option 1: return 401 Unauthorized
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			// Option 2: redirect to login page
+			// http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }
