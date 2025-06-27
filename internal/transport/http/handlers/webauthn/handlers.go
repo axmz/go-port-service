@@ -23,6 +23,7 @@ type WebAuthnService interface {
 type SessionManager interface {
 	Put(ctx context.Context, key string, data any)
 	Get(ctx context.Context, key string) any
+	Remove(ctx context.Context, key string)
 }
 
 type Handlers struct {
@@ -115,4 +116,11 @@ func (h *Handlers) FinishLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.OK(w, "Registration Success")
+}
+
+func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
+	// Remove the webauthn session data
+	h.session.Remove(r.Context(), WebauthSessionKey)
+
+	response.OK(w, "Logged out")
 }

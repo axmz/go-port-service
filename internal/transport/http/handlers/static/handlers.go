@@ -1,23 +1,15 @@
-package handlers
+package static
 
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/axmz/go-port-service/internal/transport/http/handlers/port"
-	"github.com/axmz/go-port-service/internal/transport/http/handlers/webauthn"
 )
 
 type Handlers struct {
-	Ports    *port.Handlers
-	WebAuthn *webauthn.Handlers
 }
 
-func New(p port.PortService, wa webauthn.WebAuthnService, session webauthn.SessionManager) *Handlers {
-	return &Handlers{
-		Ports:    port.New(p),
-		WebAuthn: webauthn.New(wa, session),
-	}
+func New() *Handlers {
+	return &Handlers{}
 }
 
 func (h *Handlers) HomePage(w http.ResponseWriter, r *http.Request) {

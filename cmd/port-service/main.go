@@ -2,53 +2,160 @@ package main
 
 import (
 	"encoding/gob"
+	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/alexedwards/scs/v2"
+	"github.com/go-webauthn/webauthn/webauthn"
+
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/domain/user"
 	"github.com/axmz/go-port-service/internal/logger"
 	"github.com/axmz/go-port-service/pkg/graceful"
 	"github.com/axmz/go-port-service/pkg/inmem"
-	"github.com/go-webauthn/webauthn/webauthn"
 
 	portRepository "github.com/axmz/go-port-service/internal/repository/port"
 	userRepository "github.com/axmz/go-port-service/internal/repository/user"
+
 	portServices "github.com/axmz/go-port-service/internal/services/port"
-	webauthnServices "github.com/axmz/go-port-service/internal/services/webauthn"
-	"github.com/axmz/go-port-service/internal/transport/http"
+	webAuthnServices "github.com/axmz/go-port-service/internal/services/webauthn"
+
+	gqlHandler "github.com/axmz/go-port-service/internal/transport/graphql/handler"
+	portHandlers "github.com/axmz/go-port-service/internal/transport/http/handlers/port"
+	staticHandlers "github.com/axmz/go-port-service/internal/transport/http/handlers/static"
+	webAuthnHandlers "github.com/axmz/go-port-service/internal/transport/http/handlers/webauthn"
+
+	"github.com/axmz/go-port-service/internal/transport/http/middleware"
 )
 
-func run() error {
-	cfg := config.MustLoad()
+type App struct {
+	Config *config.Config
+	Log    *slog.Logger
+	DB     struct {
+		Port *inmem.InMemoryDB[*portRepository.Port]
+		User *inmem.InMemoryDB[*user.User]
+	}
+	Repos struct {
+		Port *portRepository.Repository
+		User *userRepository.Repository
+	}
+	Services struct {
+		Port           *portServices.Service
+		WebAuthn       *webAuthnServices.Service
+		SessionManager *scs.SessionManager
+	}
+	Handlers struct {
+		Static       *staticHandlers.Handlers
+		Ports        *portHandlers.Handlers
+		WebAuthn     *webAuthnHandlers.Handlers
+		GraphQLQuery *gqlHandler.GraphQLHandler
+	}
+}
 
-	logger.Setup(cfg.Env)
+func SetupApp() *App {
+	app := &App{}
 
-	slog.Info("Application starting", slog.String("env", cfg.Env))
+	// Config
+	app.Config = config.MustLoad()
+
+	// Logger
+	app.Log = logger.Setup(app.Config.Env) // TODO: use logger in the app instead of slog?
 
 	// DB
-	portDB := inmem.New[*portRepository.Port]()
-	userDB := inmem.New[*user.User]()
+	app.DB.Port = inmem.New[*portRepository.Port]()
+	app.DB.User = inmem.New[*user.User]()
 
 	// Repositories
-	portRepo := portRepository.New(portDB)
-	userRepo := userRepository.New(userDB)
+	app.Repos.Port = portRepository.New(app.DB.Port)
+	app.Repos.User = userRepository.New(app.DB.User)
 
 	// Services
-	portSvc := portServices.New(portRepo)
-	webauthnSvc := webauthnServices.New(cfg, userRepo)
-
+	app.Services.Port = portServices.New(app.Repos.Port)
+	app.Services.WebAuthn = webAuthnServices.New(app.Config, app.Repos.User)
+	app.Services.SessionManager = scs.New()
 	gob.Register(webauthn.SessionData{})
-	sessionManager := scs.New()
 
-	// Server
-	srv := http.Start(cfg, portSvc, webauthnSvc, sessionManager)
+	// Handlers
+	app.Handlers.Static = staticHandlers.New()
+	app.Handlers.Ports = portHandlers.New(app.Services.Port)
+	app.Handlers.WebAuthn = webAuthnHandlers.New(app.Services.WebAuthn, app.Services.SessionManager)
+	app.Handlers.GraphQLQuery = gqlHandler.InitGql(app.Services.Port)
 
-	<-graceful.Shutdown(cfg.GracefulTimeout, map[string]graceful.Operation{
-		"port-database": portDB.Shutdown,
-		"user-database": userDB.Shutdown,
-		"http-server":   srv.Shutdown,
+	return app
+}
+
+type Server struct {
+	router *http.Server
+}
+
+func NewServer(app *App) *Server {
+	mux := http.NewServeMux()
+
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
+	mux.HandleFunc("/", app.Handlers.Static.HomePage)
+	mux.Handle("/private", middleware.LoggedInMiddleware(app.Services.SessionManager, http.HandlerFunc(app.Handlers.Static.PrivatePage)))
+	mux.HandleFunc("/metrics", app.Handlers.Static.Metrics)
+
+	mux.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
+	mux.Handle("/query", app.Handlers.GraphQLQuery)
+
+	mux.HandleFunc("POST /api/ports", app.Handlers.Ports.Upload)
+	mux.HandleFunc("GET /api/ports", app.Handlers.Ports.GetAll)
+	mux.HandleFunc("GET /api/ports/{id}", app.Handlers.Ports.Get)
+	mux.HandleFunc("GET /api/ports/count", app.Handlers.Ports.Count)
+	mux.HandleFunc("PUT /api/ports/{id}", app.Handlers.Ports.UpdatePort)
+	mux.HandleFunc("DELETE /api/ports/{id}", app.Handlers.Ports.Delete)
+
+	mux.HandleFunc("POST /api/webauth/register/begin", app.Handlers.WebAuthn.BeginRegistration)
+	mux.HandleFunc("POST /api/webauth/register/finish", app.Handlers.WebAuthn.FinishRegistration)
+	mux.HandleFunc("POST /api/webauth/login/begin", app.Handlers.WebAuthn.BeginLogin)
+	mux.HandleFunc("POST /api/webauth/login/finish", app.Handlers.WebAuthn.FinishLogin)
+	mux.HandleFunc("POST /api/webauth/logout", app.Handlers.WebAuthn.Logout)
+
+	handler :=
+		middleware.Recoverer(
+			app.Services.SessionManager.LoadAndSave(
+				middleware.RequestID(
+					middleware.Logger(mux))))
+
+	r := &http.Server{
+		Handler:      handler,
+		Addr:         app.Config.HTTPServer.Port,
+		IdleTimeout:  app.Config.HTTPServer.IdleTimeout,
+		ReadTimeout:  app.Config.HTTPServer.ReadTimeout,
+		WriteTimeout: app.Config.HTTPServer.WriteTimeout,
+	}
+
+	return &Server{
+		router: r,
+	}
+}
+
+func (s *Server) Run() error {
+	slog.Info(fmt.Sprintf("Starting server on %s", s.router.Addr), slog.String("op", "main.Server.Run"))
+	if err := s.router.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("HTTP server ListenAndServe: %v", err)
+	}
+	return nil
+}
+
+func start() error {
+	app := SetupApp()
+	server := NewServer(app)
+	slog.Info("Application starting", slog.String("env", app.Config.Env))
+
+	go func() {
+		server.Run()
+	}()
+
+	<-graceful.Shutdown(app.Config.GracefulTimeout, map[string]graceful.Operation{
+		"port-database": app.DB.Port.Shutdown,
+		"user-database": app.DB.User.Shutdown,
+		"http-server":   server.router.Shutdown,
 	})
 
 	slog.Info("Application stopped")
@@ -57,7 +164,7 @@ func run() error {
 }
 
 func main() {
-	if err := run(); err != nil {
+	if err := start(); err != nil {
 		log.Fatal(err)
 	}
 }
