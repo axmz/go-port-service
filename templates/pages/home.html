@@ -1,0 +1,60 @@
+{{define "title"}}Home{{end}}
+{{define "content"}}
+<header>
+    <h1>⚓️ Golang Maritime Port Service</h1>
+    <p>This project is meant to demonstrate my ability to setup a typical golang backend project.
+        It represent a service that allows a maritime company bulk upload and query information about maritime ports.
+    </p>
+</header>
+
+<section>
+    <details>
+        <summary><strong>Demonstrated skills</strong></summary>
+        <ul style="text-align: left; margin: 0 auto; width: 50%;">
+            <li>Hexagonal architecture</li>
+            <li>REST API with CRUD operations</li>
+            <li>Stream processing</li>
+            <li>WebAuthn authentication</li>
+            <li>Middleware</li>
+            <li>Containerization</li>
+            <li>Deployment</li>
+            <li>Generics</li>
+            <li>GraphQL</li>
+            <li>Session management</li>
+            <li>Tests: unit, integration, e2e</li>
+            <li>Go Template engine</li>
+        </ul>
+    </details>
+</section>
+
+<section>
+    <p>To get started go to <a href="/public">/public</a> try passwordless authentication to access <a
+            href="/private">/private</a>.</p>
+
+    <h2>🔐 Passwordless login</h2>
+    <form id="authForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required autocomplete="username" />
+        <br><br>
+        <button type="button" id="registerBtn">Register</button>
+        <button type="button" id="loginBtn">Login</button>
+    </form>
+    <pre id="output"></pre>
+</section>
+
+<section>
+    <details>
+        <summary><strong>Watch a video about passwordless login with Passkeys</strong></summary>
+        <p>Passkeys are a passwordless authentication method designed to replace traditional passwords and enhance
+            security.
+        </p>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/3BmYR--3z8M?si=U-MB001erOoQk_ct"
+            title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </details>
+</section>
+{{end}}
+{{define "scripts"}}
+<script src="/static/webauthn.js"></script>
+{{end}}

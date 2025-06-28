@@ -126,6 +126,8 @@ func (s *Service) FinishLogin(
 	}
 
 	if credential.Authenticator.CloneWarning {
+		// TODO: Handle clone warning
+		log.Println("Authenticator clone warning detected")
 	}
 
 	user.AddCredential(credential)

@@ -10,21 +10,17 @@ This application covers topics like:
 - GraphQL
 
 # TODO:
-move .vscode
-
-Add filtering support (e.g., filter by country).
-Add pagination.
-Add mutations: updatePort(id: ID!, input: PortInput!).
-
-makefile, cover
-docker compose
-
-move all postman files
-deploy
-
-linter
-metrics
-
-style home: add buttons, description
-
-protect api with middlware
+.vscode
+Docker compose
+Postman
+Deploy
+Linter
+Tests
+Logs
+Protect api with auth middlware
+CSRF middleware
+Ovservability: graphana, prometheus
+REST/GraphQL:
+- Add filtering support (e.g., filter by country).
+- Add pagination.
+- Add mutations: updatePort(id: ID!, input: PortInput!).

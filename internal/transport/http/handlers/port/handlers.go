@@ -157,7 +157,7 @@ func (h *Handlers) UpdatePort(w http.ResponseWriter, r *http.Request) {
 	} else {
 		copy, _ := p.Copy()
 		// TODO: impl granular update or complete replace
-		copy.SetName("TEST")
+		_ = copy.SetName("TEST")
 		if err := h.port.Upload(r.Context(), copy); err != nil {
 			response.BadRequest(w, err.Error())
 			return

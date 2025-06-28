@@ -14,6 +14,7 @@ import (
 	"github.com/axmz/go-port-service/internal/config"
 	"github.com/axmz/go-port-service/internal/domain/user"
 	"github.com/axmz/go-port-service/internal/logger"
+	"github.com/axmz/go-port-service/internal/renderer"
 	"github.com/axmz/go-port-service/pkg/graceful"
 	"github.com/axmz/go-port-service/pkg/inmem"
 
@@ -48,11 +49,12 @@ type App struct {
 		SessionManager *scs.SessionManager
 	}
 	Handlers struct {
-		Static       *staticHandlers.Handlers
+		Page         *staticHandlers.Handlers
 		Ports        *portHandlers.Handlers
 		WebAuthn     *webAuthnHandlers.Handlers
 		GraphQLQuery *gqlHandler.GraphQLHandler
 	}
+	TemplateRenderer *renderer.TemplateRenderer
 }
 
 func SetupApp() *App {
@@ -78,8 +80,11 @@ func SetupApp() *App {
 	app.Services.SessionManager = scs.New()
 	gob.Register(webauthn.SessionData{})
 
+	// Renderer
+	app.TemplateRenderer = renderer.NewTemplateRenderer()
+
 	// Handlers
-	app.Handlers.Static = staticHandlers.New()
+	app.Handlers.Page = staticHandlers.New(app.TemplateRenderer)
 	app.Handlers.Ports = portHandlers.New(app.Services.Port)
 	app.Handlers.WebAuthn = webAuthnHandlers.New(app.Services.WebAuthn, app.Services.SessionManager)
 	app.Handlers.GraphQLQuery = gqlHandler.InitGql(app.Services.Port)
@@ -96,9 +101,10 @@ func NewServer(app *App) *Server {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	mux.HandleFunc("/", app.Handlers.Static.HomePage)
-	mux.Handle("/private", middleware.LoggedInMiddleware(app.Services.SessionManager, http.HandlerFunc(app.Handlers.Static.PrivatePage)))
-	mux.HandleFunc("/metrics", app.Handlers.Static.Metrics)
+	mux.HandleFunc("/", app.Handlers.Page.Home)
+	mux.Handle("/private", middleware.LoggedInMiddleware(app.Services.SessionManager, http.HandlerFunc(app.Handlers.Page.Private)))
+	mux.Handle("/public", http.HandlerFunc(app.Handlers.Page.Private))
+	mux.HandleFunc("/metrics", app.Handlers.Page.Metrics)
 
 	mux.Handle("/playground", playground.Handler("GraphQL playground", "/query"))
 	mux.Handle("/query", app.Handlers.GraphQLQuery)
@@ -135,12 +141,11 @@ func NewServer(app *App) *Server {
 	}
 }
 
-func (s *Server) Run() error {
+func (s *Server) Run() {
 	slog.Info(fmt.Sprintf("Starting server on %s", s.router.Addr), slog.String("op", "main.Server.Run"))
 	if err := s.router.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe: %v", err)
 	}
-	return nil
 }
 
 func start() error {

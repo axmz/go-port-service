@@ -1,0 +1,158 @@
+{{define "title"}}Private Page{{end}}
+
+{{define "content"}}
+<header>
+    <div style="display: flex; justify-self: right;">
+        <a href="/">Home</a>&nbsp;<button type="button" id="logoutBtn">Logout</button>
+    </div>
+    <h1>Private Page</h1>
+    <p>Welcome to the private page. Here you can upload bulk ports data. You can also try Postman to test all the
+        endpoints and query data with GraphQL.</p>
+</header>
+
+<section>
+    <div style="position: relative; width: 100%; max-width: 600px; margin: 20px auto;">
+        <pre id="indicator" style="
+            position: relative;
+            text-align: left;
+            margin: 0;
+            background: gray;
+            padding: 10px;
+            color: gold;
+            overflow-x: auto;
+        ">
+go readJSON()
+
+for {
+    select {
+        case p := <-portCh: // upload
+        case err := <-errCh: // handle errors
+        case <-doneCh: // when job is done
+        case <-r.Context().Done(): // handle cancellation
+    }
+}</pre>
+        <div id="indicator-bg" style="
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 0;
+            background: gold;
+            transition: width 0.2s;
+        "></div>
+        <div id="done" style="
+            position: absolute;
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0;
+            width: 100%; height: 100%;
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 5rem; 
+            color: white; 
+            font-weight: 700;">
+            <div>DONE</div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Upload Ports Data</h2>
+    <form id="jsonForm">
+        <label for="jsonFile">
+            <p style="display: inline;"><a href="/static/ports.json" download>Download</a> a test JSON file:</p>
+        </label>
+        <input type="file" id="jsonFile" name="jsonFile" accept=".json,application/json" required />
+        <button type="button" id="streamUploadBtn">Stream upload to /api/ports</button>
+        <br></br>
+        <div>
+        </div>
+    </form>
+    <pre id="output"></pre>
+    <pre id="success" style="color: forestgreen"></pre>
+</section>
+
+
+<section>
+    <h2>Query with GraphQL</h2>
+    <p>You may want to try GraphQL Playground to query the data <a href="/playground">Playground</a></p>
+</section>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    document.getElementById('jsonForm').onclick = async function () {
+        const done = document.getElementById('done');
+        done.style.display = 'none';
+        const indicatorBg = document.getElementById('indicator-bg');
+        indicatorBg.style.width = '0';
+    }
+
+    document.getElementById('logoutBtn').onclick = async function () {
+        try {
+            const res = await fetch('/api/webauth/logout', { method: 'POST' });
+            if (res.ok) {
+                window.location.href = "/";
+            } else {
+                document.getElementById('output').textContent = 'Logout failed.';
+            }
+        } catch (err) {
+            document.getElementById('output').textContent = 'Logout error: ' + err;
+        }
+    };
+
+    document.getElementById('streamUploadBtn').onclick = async function () {
+        document.getElementById('output').textContent = '';
+        document.getElementById('success').textContent = '';
+        const fileInput = document.getElementById('jsonFile');
+        if (!fileInput.files.length) {
+            document.getElementById('output').textContent = 'Please select a file.';
+            return;
+        }
+        const file = fileInput.files[0];
+        const indicatorBg = document.getElementById('indicator-bg');
+        indicatorBg.style.width = '0';
+
+        try {
+            // Use XMLHttpRequest for progress events
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/ports', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    indicatorBg.style.width = percent + '%';
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    document.getElementById('success').textContent = 'Upload successful: ' + xhr.responseText;
+                } else {
+                    document.getElementById('output').textContent = 'Upload failed: ' + xhr.responseText;
+                }
+                indicatorBg.style.width = '100%';
+                setTimeout(() => { done.style.display = 'flex'; }, 1000);
+            };
+
+            xhr.onerror = function () {
+                document.getElementById('output').textContent = 'Upload error';
+                indicatorBg.style.width = '0';
+            };
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                xhr.send(e.target.result);
+            };
+            reader.onerror = function () {
+                document.getElementById('output').textContent = 'File read error';
+                indicatorBg.style.width = '0';
+            };
+            reader.readAsText(file);
+        } catch (err) {
+            document.getElementById('output').textContent = 'Upload error: ' + err;
+            indicatorBg.style.width = '0';
+        }
+    };
+</script>
+{{end}}
