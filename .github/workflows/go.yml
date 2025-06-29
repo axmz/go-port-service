@@ -21,7 +21,7 @@ jobs:
       uses: golangci/golangci-lint-action@v6.0.1
       with:
         version: v1.58.2
-        install-only: true 
+        args: --version
 
     - name: Test
       run: make ci
