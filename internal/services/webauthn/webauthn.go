@@ -26,12 +26,13 @@ func New(cfg *config.Config, userRepo UserRepository) *Service {
 	proto := cfg.HTTPServer.Protocol
 	host := cfg.HTTPServer.Host
 	port := cfg.HTTPServer.Port
-	origin := fmt.Sprintf("%s://%s%s", proto, host, port)
+	origin := fmt.Sprintf("%s://%s", proto, host)
+	originWithPort := fmt.Sprintf("%s://%s%s", proto, host, port)
 
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Port Service",
 		RPID:          host,
-		RPOrigins:     []string{origin},
+		RPOrigins:     []string{origin,originWithPort},
 	})
 
 	if err != nil {
