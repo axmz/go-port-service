@@ -10,14 +10,12 @@ This application covers topics like:
 - GraphQL
 
 # TODO:
-.vscode
-Docker compose
+Discoverable credentials
 Postman
-Deploy
 Linter
 Tests
-Logs
-Protect api with auth middlware
+Logs, slog source
+Protect API with auth middleware
 CSRF middleware
 Ovservability: graphana, prometheus
 REST/GraphQL:
