@@ -24,8 +24,7 @@ func JSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		const op = "transport.http.response.JSON"
-		slog.Info(fmt.Sprintf("error encoding JSON: %v", err), slog.String("op", op))
+		slog.Info(fmt.Sprintf("error encoding JSON: %v", err))
 	}
 }
 
@@ -38,14 +37,12 @@ func Err(w http.ResponseWriter, status int, msg string) {
 }
 
 func InternalServerError(w http.ResponseWriter, err error) {
-	const op = "transport.http.response.InternalSeverError"
-	slog.Info(fmt.Sprintf("Internal server error: %v", err), slog.String("op", op))
+	slog.Info(fmt.Sprintf("Internal server error: %v", err))
 	Err(w, http.StatusInternalServerError, "internal server error")
 }
 
 func BadRequest(w http.ResponseWriter, msg string) {
-	const op = "transport.http.response.BadRequest"
-	slog.Info(fmt.Sprintf("Bad Request: %v", msg), slog.String("op", op))
+	slog.Info(fmt.Sprintf("Bad Request: %v", msg))
 	Err(w, http.StatusBadRequest, msg)
 }
 

@@ -63,7 +63,7 @@ func NewServer(app *app.App) *Server {
 }
 
 func (s *Server) Run() {
-	slog.Info(fmt.Sprintf("Starting server on %s", s.Router.Addr), slog.String("op", "main.Server.Run"))
+	slog.Info(fmt.Sprintf("Starting server on %s", s.Router.Addr))
 	if err := s.Router.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe: %v", err)
 	}

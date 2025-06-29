@@ -50,13 +50,11 @@ func GetReqID(ctx context.Context) string {
 }
 
 func Logger(next http.Handler) http.Handler {
-	const op = "transport.http.middleware.Logger"
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		reqID := GetReqID(r.Context())
 
 		slog.With(
-			slog.String("component", op),
 			slog.String("method", r.Method),
 			slog.String("path", r.URL.Path),
 			slog.String("remote", r.RemoteAddr),
@@ -78,14 +76,12 @@ func Logger(next http.Handler) http.Handler {
 }
 
 func Recoverer(next http.Handler) http.Handler {
-	const op = "transport.http.middleware.Recoverer"
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
 				reqID := GetReqID(r.Context())
 
 				slog.Error("panic recovered",
-					slog.String("op", op),
 					slog.Any("error", rec),
 					slog.String("stack", string(debug.Stack())),
 					slog.String("req_id", reqID),
@@ -109,7 +105,6 @@ func LoggedInMiddleware(session *scs.SessionManager, next http.Handler) http.Han
 		s, ok := session.Get(r.Context(), wah.WebauthSessionKey).(webauthn.SessionData)
 		if !ok {
 			slog.Error("session not found",
-				slog.String("op", "LoggedInMiddleware"),
 				slog.String("req_id", GetReqID(r.Context())),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),

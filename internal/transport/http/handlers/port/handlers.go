@@ -107,7 +107,6 @@ func readBody(r *http.Request, portCh chan Request, errCh chan error, doneCh cha
 }
 
 func (h *Handlers) Upload(w http.ResponseWriter, r *http.Request) {
-	const op = "transport.http.handlers.Upload"
 	r.Body = http.MaxBytesReader(w, r.Body, 50<<20) // TODO: move to config or middleware
 
 	portCh := make(chan Request)
@@ -120,10 +119,10 @@ func (h *Handlers) Upload(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-r.Context().Done():
-			slog.Info("request cancelled", slog.String("op", op))
+			slog.Info("request cancelled")
 			return
 		case err := <-errCh:
-			slog.Info(err.Error(), slog.String("op", op))
+			slog.Info(err.Error())
 			response.Err(w, http.StatusBadRequest, err.Error())
 			return
 		case p := <-portCh:
@@ -136,7 +135,7 @@ func (h *Handlers) Upload(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		case <-doneCh:
-			slog.Info("data processed successfully", slog.String("op", op))
+			slog.Info("data processed successfully")
 			response.OK(w, countPorts)
 			return
 		}

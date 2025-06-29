@@ -19,8 +19,6 @@ This project is meant to demonstrate my ability to setup a typical golang backen
 
 # TODO:
 - Discoverable credentials
-- Tests
-- Logs, slog source
 - Protect API with auth middleware
 - CSRF middleware
 - Ovservability: graphana, prometheus
