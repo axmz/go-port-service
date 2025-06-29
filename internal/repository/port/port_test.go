@@ -47,15 +47,6 @@ func testDomainPort() *port.Port {
 	p, _ := port.New("id1", "name", "code", "city", "country", nil, nil, nil, "", "", nil)
 	return p
 }
-func testRepoPort() *Port {
-	return &Port{
-		ID:      "id1",
-		Name:    "name",
-		Code:    "code",
-		City:    "city",
-		Country: "country",
-	}
-}
 
 func TestPortRepository(t *testing.T) {
 	t.Run("UploadAndGet", func(t *testing.T) {

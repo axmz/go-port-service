@@ -32,7 +32,7 @@ func New(cfg *config.Config, userRepo UserRepository) *Service {
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName: "Port Service",
 		RPID:          host,
-		RPOrigins:     []string{origin,originWithPort},
+		RPOrigins:     []string{origin, originWithPort},
 	})
 
 	if err != nil {

@@ -13,27 +13,21 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	repository "github.com/axmz/go-port-service/internal/repository/port"
-	services "github.com/axmz/go-port-service/internal/services/port"
-	"github.com/axmz/go-port-service/internal/transport/http/handlers"
+	"github.com/axmz/go-port-service/internal/app"
 	"github.com/axmz/go-port-service/internal/transport/http/response"
-	router "github.com/axmz/go-port-service/internal/transport/http/router"
-	"github.com/axmz/go-port-service/pkg/inmem"
+	"github.com/axmz/go-port-service/internal/transport/http/server"
 )
 
 const (
-	portsJsonPath = "../../../ports.json"
+	portsJsonPath = "../../../static/ports.json"
 	portsCount    = 1632.0
 	sampleID      = "ZWUTA"
 )
 
 func TestE2E_PortAPI(t *testing.T) {
-	// Setup in-memory repo, service, handlers, and router
-	db := inmem.New[*repository.Port]()
-	repo := repository.New(db)
-	svc := services.New(repo)
-	h := handlers.New(svc)
-	r := router.Router(h, nil)
+	app := app.SetupApp()
+	server := server.NewServer(app)
+	r := server.Router.Handler
 
 	// Load ports.json
 	portsJson, err := os.ReadFile(portsJsonPath)
