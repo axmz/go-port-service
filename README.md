@@ -1,22 +1,24 @@
 # go-port-service
-This application covers topics like:
+
+https://go-port-service.onrender.com
+
+This project is meant to demonstrate my ability to setup a typical golang backend project. It represent a service that allows a maritime company bulk upload and query information about maritime ports.
+
 - Hexagonal architecture
+- REST API with CRUD operations. <a href="https://www.postman.com/go-port-service/go-port-service">Test with postman</a>
 - Stream processing
-- CRUD
+- WebAuthn authentication
 - Middleware
 - Containerization
 - Deployment
 - Generics
 - GraphQL
+- Session management
+- Tests: unit, integration, e2e
+- Go Template engine
 
 # TODO:
-- req_id changing
-- canceled request
-- check go mod download
-- Provide link, add description
 - Discoverable credentials
-- Postman, connect mock servers
-- Linter
 - Tests
 - Logs, slog source
 - Protect API with auth middleware
