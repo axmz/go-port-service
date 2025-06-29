@@ -1,7 +1,7 @@
 {{define "title"}}Home{{end}}
 {{define "content"}}
-<header>
-    <h1>⚓️ Golang Maritime Port Service</h1>
+<header style="margin-top: 50px;">
+    <h1 style="text-align: center;">⚓️ Golang Maritime Port Service</h1>
     <p>This project is meant to demonstrate my ability to setup a typical golang backend project.
         It represent a service that allows a maritime company bulk upload and query information about maritime ports.
     </p>
@@ -10,7 +10,7 @@
 <section>
     <details>
         <summary><strong>Demonstrated skills</strong></summary>
-        <ul style="text-align: left; margin: 0 auto; width: 50%;">
+        <ul style="text-align: left; width: 50%;">
             <li>Hexagonal architecture</li>
             <li>REST API with CRUD operations</li>
             <li>Stream processing</li>
@@ -25,21 +25,22 @@
             <li>Go Template engine</li>
         </ul>
     </details>
-</section>
-
-<section>
     <p>To get started go to <a href="/public">/public</a> or try passwordless authentication to access <a
             href="/private">/private</a>.</p>
+</section>
 
-    <h2>🔐 Passwordless login</h2>
-    <form id="authForm">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required autocomplete="username" />
-        <br><br>
-        <button type="button" id="registerBtn">Register</button>
-        <button type="button" id="loginBtn">Login</button>
-    </form>
-    <pre style="text-wrap: auto;" id="output"></pre>
+<section style="padding: 40px;">
+    <div style="text-align: center;padding: 20px; border: 1px solid black;">
+        <h2>🔐 Passwordless login</h2>
+        <form id="authForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required autocomplete="username" />
+            <br><br>
+            <button type="button" id="registerBtn">Register</button>
+            <button type="button" id="loginBtn">Login</button>
+        </form>
+        <pre style="text-wrap: auto;" id="output"></pre>
+    </div>
 </section>
 
 <section>
